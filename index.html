@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SKYBOUND – ULTIMATE 3D FLIGHT EXPERIENCE</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loader-logo">SKYBOUND</div>
+      <div class="loader-sub">ULTIMATE 3D FLIGHT EXPERIENCE</div>
+      <div class="loader-bar-wrap">
+        <div id="loader-progress"></div>
+      </div>
+      <div id="loader-status">INITIALIZING 3D WORLD &amp; AVIONICS...</div>
+    </div>
+
+    <!-- Cockpit Camera Dashboard Frame -->
+    <div id="cockpit-overlay" class="hidden">
+      <div class="cockpit-canopy-top"></div>
+      <div class="cockpit-pillars"></div>
+      <div class="cockpit-glareshield">
+        <div class="cockpit-mfd" id="cockpit-mfd-left">NAV: RWY 36 // 118.50 MHz</div>
+        <div class="cockpit-mfd" id="cockpit-mfd-center">AP: MAN // FLC: ACTIVE</div>
+        <div class="cockpit-mfd" id="cockpit-mfd-right">SYS: NOMINAL // OIL 92%</div>
+      </div>
+    </div>
+
+    <!-- Stall / Boundary Alert Banner -->
+    <div id="hud-alert-banner" class="hidden">STALL WARNING – INCREASE SPEED &amp; LOWER NOSE</div>
+
+    <!-- Aviation HUD -->
+    <div id="hud-layer" class="hidden">
+      <div class="hud-top-bar">
+        <!-- Flight Mode, Score, Timer -->
+        <div class="hud-card hud-mission-box">
+          <div class="hud-stat-group">
+            <span class="hud-label">Flight Mode</span>
+            <span class="hud-val accent" id="hud-mode">FREE FLIGHT</span>
+          </div>
+          <div class="hud-stat-group">
+            <span class="hud-label">Score</span>
+            <span class="hud-val orange" id="hud-score">0</span>
+          </div>
+          <div class="hud-stat-group">
+            <span class="hud-label">Mission Timer</span>
+            <span class="hud-val" id="hud-timer">00:00.0</span>
+          </div>
+        </div>
+
+        <!-- Heading Compass & Target Indicator -->
+        <div class="compass-wrapper">
+          <div class="compass-readout">HDG <span id="hud-heading">360</span>°</div>
+          <div class="compass-tape-box">
+            <div class="compass-center-caret"></div>
+            <div id="compass-strip">N &nbsp; 030 &nbsp; 060 &nbsp; E &nbsp; 120 &nbsp; 150 &nbsp; S &nbsp; 210 &nbsp; 240 &nbsp; W &nbsp; 300 &nbsp; 330 &nbsp; N</div>
+          </div>
+          <div id="hud-target-banner" class="hidden">
+            <span id="target-arrow">&#9650;</span>
+            <span id="hud-target-text">CHECKPOINT 1/12 &bull; 850 m</span>
+          </div>
+        </div>
+
+        <!-- Top Right Action Buttons -->
+        <div class="hud-quick-actions">
+          <button type="button" class="hud-icon-btn" id="btn-hud-camera" title="Change Camera (C)">CAM: <span id="hud-cam-label">CHASE</span></button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-mute" title="Mute / Unmute Audio (M)">AUDIO: <span id="hud-audio-label">ON</span></button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-reset" title="Reset Aircraft (R)">RESET</button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-fullscreen" title="Fullscreen (F)">FULL</button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-pause" title="Pause Game (P)">PAUSE</button>
+        </div>
+      </div>
+
+      <!-- Center HUD: Airspeed Tape, Artificial Horizon, Altitude Tape -->
+      <div class="hud-center-row">
+        <!-- Airspeed Gauge -->
+        <div class="hud-tape-panel">
+          <span class="hud-label">Airspeed</span>
+          <span class="hud-val accent"><span id="hud-airspeed">0</span> <small>KM/H</small></span>
+          <div class="tape-gauge-bar">
+            <div class="tape-fill" id="hud-speed-bar"></div>
+            <div class="tape-ticks"></div>
+          </div>
+        </div>
+
+        <!-- Artificial Horizon (ADI) -->
+        <div class="adi-container">
+          <div id="adi-horizon-disc">
+            <div class="adi-sky-half"></div>
+            <div class="adi-ground-half"></div>
+            <div class="adi-pitch-ladder" id="adi-pitch-ladder">
+              <div class="pitch-rung"></div>
+              <div class="pitch-rung short"></div>
+              <div class="pitch-rung"></div>
+              <div class="pitch-rung short"></div>
+              <div class="pitch-rung"></div>
+            </div>
+          </div>
+          <div class="adi-reticle">
+            <div class="reticle-wing"></div>
+            <div class="reticle-dot"></div>
+            <div class="reticle-wing"></div>
+          </div>
+        </div>
+
+        <!-- Altitude Gauge -->
+        <div class="hud-tape-panel">
+          <span class="hud-label">Altitude</span>
+          <span class="hud-val accent"><span id="hud-altitude">0</span> <small>M</small></span>
+          <div class="tape-gauge-bar">
+            <div class="tape-fill" id="hud-alt-bar"></div>
+            <div class="tape-ticks"></div>
+          </div>
+          <span class="hud-label">V/S: <span id="hud-vspeed">+0.0</span> m/s</span>
+        </div>
+      </div>
+
+      <!-- Bottom HUD Bar -->
+      <div class="hud-bottom-bar">
+        <div class="hud-card throttle-card">
+          <div class="throttle-bar-outer">
+            <div id="hud-throttle-fill"></div>
+          </div>
+          <div class="hud-stat-group">
+            <span class="hud-label">Throttle</span>
+            <span class="hud-val orange"><span id="hud-throttle">0</span>%</span>
+            <div class="status-pills">
+              <span class="status-pill active-green" id="pill-gear">GEAR DOWN</span>
+              <span class="status-pill" id="pill-brake">BRAKE OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-card hud-controls-hint">
+          <span><kbd>W</kbd>/<kbd>S</kbd> Pitch</span>
+          <span><kbd>A</kbd>/<kbd>D</kbd> Roll</span>
+          <span><kbd>Q</kbd>/<kbd>E</kbd> Yaw</span>
+          <span><kbd>SHIFT</kbd>/<kbd>CTRL</kbd> Throttle</span>
+          <span><kbd>B</kbd> Brake</span>
+          <span><kbd>C</kbd> Camera</span>
+          <span><kbd>R</kbd> Reset</span>
+          <span><kbd>P</kbd> Pause</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- On-Screen Touch Controls -->
+    <div id="touch-controls">
+      <div class="touch-pad">
+        <div></div>
+        <button type="button" class="touch-btn" data-key="KeyS">NOSE DN</button>
+        <div></div>
+        <button type="button" class="touch-btn" data-key="KeyA">ROLL L</button>
+        <button type="button" class="touch-btn" data-key="KeyB">BRAKE</button>
+        <button type="button" class="touch-btn" data-key="KeyD">ROLL R</button>
+        <button type="button" class="touch-btn" data-key="KeyQ">YAW L</button>
+        <button type="button" class="touch-btn" data-key="KeyW">NOSE UP</button>
+        <button type="button" class="touch-btn" data-key="KeyE">YAW R</button>
+      </div>
+      <div class="touch-actions">
+        <button type="button" class="touch-btn" data-key="ShiftLeft">THR +</button>
+        <button type="button" class="touch-btn" data-key="ControlLeft">THR -</button>
+      </div>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="overlay-screen">
+      <div class="menu-shell">
+        <div class="menu-header">
+          <div>
+            <h1 class="brand-title">SKYBOUND</h1>
+            <div class="brand-subtitle">ULTIMATE 3D FLIGHT EXPERIENCE</div>
+          </div>
+          <div class="selected-aircraft-badge">
+            <div class="hud-label">Active Aircraft</div>
+            <div class="hud-val accent" id="menu-active-aircraft">SKYHAWK X1</div>
+          </div>
+        </div>
+
+        <div class="menu-grid">
+          <div class="menu-buttons-col">
+            <button type="button" class="menu-btn primary" id="btn-start-free">
+              <div>
+                <div>START FREE FLIGHT</div>
+                <div class="menu-btn-sub">Explore islands, mountains, downtown &amp; airports freely</div>
+              </div>
+              <span>&#9654;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-start-checkpoint">
+              <div>
+                <div>CHECKPOINT CHALLENGE</div>
+                <div class="menu-btn-sub">Race through 12 neon aerial gates against the clock</div>
+              </div>
+              <span>&#9654;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-start-landing">
+              <div>
+                <div>LANDING CHALLENGE</div>
+                <div class="menu-btn-sub">Precision final approach &amp; runway touchdown evaluation</div>
+              </div>
+              <span>&#9654;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-open-aircraft">
+              <div>
+                <div>AIRCRAFT SELECT</div>
+                <div class="menu-btn-sub">Choose from 3 specialized 3D aircrafts in the hangar</div>
+              </div>
+              <span>&#9992;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-open-settings">
+              <div>
+                <div>SETTINGS</div>
+                <div class="menu-btn-sub">Audio, graphics quality, flight controls &amp; save data</div>
+              </div>
+              <span>&#9881;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-open-help">
+              <div>
+                <div>HOW TO PLAY</div>
+                <div class="menu-btn-sub">Flight controls guide, mission rules &amp; landing tips</div>
+              </div>
+              <span>?</span>
+            </button>
+          </div>
+
+          <!-- Pilot Progression & Telemetry -->
+          <div class="career-card">
+            <div>
+              <div class="career-title">Pilot Career Logbook</div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                Progress is saved automatically to your browser storage.
+              </p>
+            </div>
+            <div class="career-stats-grid">
+              <div class="stat-tile">
+                <div class="hud-label">Career Score</div>
+                <div class="stat-tile-val" id="stat-total-score">0</div>
+              </div>
+              <div class="stat-tile">
+                <div class="hud-label">Distance Flown</div>
+                <div class="stat-tile-val" id="stat-distance">0.0 km</div>
+              </div>
+              <div class="stat-tile">
+                <div class="hud-label">Best Race Time</div>
+                <div class="stat-tile-val" id="stat-best-time">--:--</div>
+              </div>
+              <div class="stat-tile">
+                <div class="hud-label">Safe Landings</div>
+                <div class="stat-tile-val" id="stat-landings">0</div>
+              </div>
+              <div class="stat-tile">
+                <div class="hud-label">Challenges Won</div>
+                <div class="stat-tile-val" id="stat-challenges">0</div>
+              </div>
+              <div class="stat-tile">
+                <div class="hud-label">Hangar Fleet</div>
+                <div class="stat-tile-val">3 / 3 Ready</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AIRCRAFT SELECTION MODAL -->
+    <div id="modal-aircraft" class="overlay-screen hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">AIRCRAFT HANGAR SELECTION</h2>
+          <button type="button" class="btn-action" id="btn-close-aircraft">BACK TO MENU</button>
+        </div>
+        <div class="aircraft-grid">
+          <div class="aircraft-card selected" data-aircraft="prop" id="card-aircraft-prop">
+            <div class="aircraft-role">Propeller Trainer</div>
+            <div class="aircraft-name">SkyHawk X1</div>
+            <p style="font-size:0.78rem; color:var(--text-muted);">
+              Signature blue, white &amp; orange agile single-engine prop plane. Ideal for island sightseeing and smooth landings.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 320 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 62%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Handling &amp; Lift: 95%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 95%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="jet" id="card-aircraft-jet">
+            <div class="aircraft-role">Modern Business Jet</div>
+            <div class="aircraft-name">Citation Sovereign ZX</div>
+            <p style="font-size:0.78rem; color:var(--text-muted);">
+              Twin rear-turbofan executive jet with swept winglets and T-tail stabilizer. High cruise speed and stable pitch response.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 460 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 82%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Handling &amp; Stability: 84%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 84%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="sport" id="card-aircraft-sport">
+            <div class="aircraft-role">Fast Sporty Aircraft</div>
+            <div class="aircraft-name">Viper Apex GT</div>
+            <p style="font-size:0.78rem; color:var(--text-muted);">
+              High-thrust delta-wing sport jet with twin tails and dynamic afterburner. Built for rapid rolls and checkpoint records.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 560 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 100%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Roll Agility: 98%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 98%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="modal-settings" class="overlay-screen hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">AVIONICS &amp; SYSTEM SETTINGS</h2>
+          <button type="button" class="btn-action" id="btn-close-settings">SAVE &amp; CLOSE</button>
+        </div>
+        <div class="settings-list">
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700;">Master Audio Volume</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Engine synth, wind rush &amp; cockpit alerts</div>
+            </div>
+            <input type="range" id="input-volume" min="0" max="100" value="75" />
+          </div>
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700;">Sound Mute</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Toggle all Web Audio API sound effects (Shortcut: M)</div>
+            </div>
+            <button type="button" class="btn-action" id="btn-setting-mute">MUTE: OFF</button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700;">Invert Pitch Controls (W / S)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Default: W = Pitch Up (Climb), S = Pitch Down (Dive)</div>
+            </div>
+            <button type="button" class="btn-action" id="btn-setting-invert">INVERT: OFF</button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700;">On-Screen Touch Controls</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Show virtual flight pad on screen</div>
+            </div>
+            <button type="button" class="btn-action" id="btn-setting-touch">TOUCH PAD: AUTO</button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700;">Reset Career Progress</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" id="reset-progress-status">Clear saved scores, best checkpoint time &amp; landings</div>
+            </div>
+            <button type="button" class="btn-action danger" id="btn-reset-progress">RESET PROGRESS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div id="modal-help" class="overlay-screen hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">FLIGHT MANUAL &amp; CONTROLS</h2>
+          <button type="button" class="btn-action" id="btn-close-help">GOT IT</button>
+        </div>
+        <div class="controls-grid">
+          <div class="control-item"><span>Pitch Up (Climb)</span><span class="key-badge">W</span></div>
+          <div class="control-item"><span>Pitch Down (Dive)</span><span class="key-badge">S</span></div>
+          <div class="control-item"><span>Roll Left</span><span class="key-badge">A</span></div>
+          <div class="control-item"><span>Roll Right</span><span class="key-badge">D</span></div>
+          <div class="control-item"><span>Yaw Left</span><span class="key-badge">Q</span></div>
+          <div class="control-item"><span>Yaw Right</span><span class="key-badge">E</span></div>
+          <div class="control-item"><span>Increase Throttle</span><span class="key-badge">SHIFT</span></div>
+          <div class="control-item"><span>Decrease Throttle</span><span class="key-badge">CTRL</span></div>
+          <div class="control-item"><span>Airbrake / Wheel Brake</span><span class="key-badge">B</span></div>
+          <div class="control-item"><span>Reset Aircraft</span><span class="key-badge">R</span></div>
+          <div class="control-item"><span>Switch Camera View</span><span class="key-badge">C</span></div>
+          <div class="control-item"><span>Pause / Resume</span><span class="key-badge">P</span></div>
+          <div class="control-item"><span>Mute / Unmute Sound</span><span class="key-badge">M</span></div>
+          <div class="control-item"><span>Fullscreen Mode</span><span class="key-badge">F</span></div>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+          <strong>Takeoff &amp; Flight Tips:</strong> Hold <strong>SHIFT</strong> to bring throttle to 80–100%. Once airspeed exceeds 115 km/h, hold <strong>W</strong> to pitch up and climb. For smooth landings in the <strong>Landing Challenge</strong>, align with the illuminated Runway 36 centerline, reduce throttle below 30%, use <strong>B</strong> (Airbrake) to maintain ~125–155 km/h, keep wings level, and hold <strong>B</strong> once on the asphalt until your aircraft comes to a full stop.
+        </p>
+      </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="modal-pause" class="overlay-screen hidden">
+      <div class="modal-card" style="max-width: 460px;">
+        <div class="modal-header">
+          <h2 class="modal-title">FLIGHT PAUSED</h2>
+        </div>
+        <div class="menu-buttons-col">
+          <button type="button" class="menu-btn primary" id="btn-pause-resume">RESUME FLIGHT (P)</button>
+          <button type="button" class="menu-btn" id="btn-pause-restart">RESTART MISSION (R)</button>
+          <button type="button" class="menu-btn" id="btn-pause-camera">SWITCH CAMERA (C)</button>
+          <button type="button" class="menu-btn" id="btn-pause-menu">RETURN TO MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISSION COMPLETE / RESULT MODAL -->
+    <div id="modal-result" class="overlay-screen hidden">
+      <div class="modal-card" style="max-width: 560px;">
+        <div class="modal-header">
+          <h2 class="modal-title" id="result-title">MISSION COMPLETE</h2>
+        </div>
+        <p id="result-subtitle" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">
+          Outstanding flying performance!
+        </p>
+        <div class="career-stats-grid" style="margin-bottom: 20px;">
+          <div class="stat-tile">
+            <div class="hud-label" id="result-label-1">Mission Score</div>
+            <div class="stat-tile-val" id="result-val-1">0</div>
+          </div>
+          <div class="stat-tile">
+            <div class="hud-label" id="result-label-2">Elapsed Time</div>
+            <div class="stat-tile-val" id="result-val-2">00:00.0</div>
+          </div>
+          <div class="stat-tile">
+            <div class="hud-label" id="result-label-3">Performance Grade</div>
+            <div class="stat-tile-val" id="result-val-3">S RANK</div>
+          </div>
+          <div class="stat-tile">
+            <div class="hud-label" id="result-label-4">Telemetry Detail</div>
+            <div class="stat-tile-val" id="result-val-4">100%</div>
+          </div>
+        </div>
+        <div class="action-row">
+          <button type="button" class="btn-action orange" id="btn-result-retry">FLY AGAIN</button>
+          <button type="button" class="btn-action" id="btn-result-menu">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
