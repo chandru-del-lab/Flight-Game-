@@ -75,6 +75,9 @@
 
         <!-- Top Right Action Buttons -->
         <div class="hud-quick-actions">
+          <button type="button" class="hud-icon-btn highlight" id="btn-hud-map" title="Open Tactical World Map (N)">MAP</button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-sky" title="Change Time of Day (T)">SKY: <span id="hud-sky-label">DAY</span></button>
+          <button type="button" class="hud-icon-btn" id="btn-hud-touch" title="Toggle Mobile Touch Controls">TOUCH</button>
           <button type="button" class="hud-icon-btn" id="btn-hud-camera" title="Change Camera (C)">CAM: <span id="hud-cam-label">CHASE</span></button>
           <button type="button" class="hud-icon-btn" id="btn-hud-mute" title="Mute / Unmute Audio (M)">AUDIO: <span id="hud-audio-label">ON</span></button>
           <button type="button" class="hud-icon-btn" id="btn-hud-reset" title="Reset Aircraft (R)">RESET</button>
@@ -127,18 +130,30 @@
         </div>
       </div>
 
-      <!-- Bottom HUD Bar -->
+      <!-- Bottom HUD Bar: Radar Minimap + Throttle + Controls Hint -->
       <div class="hud-bottom-bar">
-        <div class="hud-card throttle-card">
-          <div class="throttle-bar-outer">
-            <div id="hud-throttle-fill"></div>
+        <div class="hud-bottom-left">
+          <!-- Live Radar Minimap -->
+          <div class="minimap-card" id="hud-minimap-box" title="Click to expand Tactical World Map (N)">
+            <canvas id="hud-minimap-canvas" width="160" height="160"></canvas>
+            <div class="minimap-overlay-label">
+              <span>RADAR MAP</span>
+              <span id="hud-coords">0, 0</span>
+            </div>
           </div>
-          <div class="hud-stat-group">
-            <span class="hud-label">Throttle</span>
-            <span class="hud-val orange"><span id="hud-throttle">0</span>%</span>
-            <div class="status-pills">
-              <span class="status-pill active-green" id="pill-gear">GEAR DOWN</span>
-              <span class="status-pill" id="pill-brake">BRAKE OFF</span>
+
+          <div class="hud-card throttle-card">
+            <div class="throttle-bar-outer">
+              <div id="hud-throttle-fill"></div>
+            </div>
+            <div class="hud-stat-group">
+              <span class="hud-label">Throttle</span>
+              <span class="hud-val orange"><span id="hud-throttle">0</span>%</span>
+              <div class="status-pills">
+                <span class="status-pill active-green" id="pill-gear">GEAR DOWN</span>
+                <span class="status-pill" id="pill-brake">BRAKE OFF</span>
+                <span class="status-pill active-amber" id="pill-smoke">SMOKE ON</span>
+              </div>
             </div>
           </div>
         </div>
@@ -147,31 +162,56 @@
           <span><kbd>W</kbd>/<kbd>S</kbd> Pitch</span>
           <span><kbd>A</kbd>/<kbd>D</kbd> Roll</span>
           <span><kbd>Q</kbd>/<kbd>E</kbd> Yaw</span>
-          <span><kbd>SHIFT</kbd>/<kbd>CTRL</kbd> Throttle</span>
+          <span><kbd>SHIFT</kbd>/<kbd>CTRL</kbd> Thr</span>
+          <span><kbd>SPACE</kbd> Afterburner</span>
           <span><kbd>B</kbd> Brake</span>
-          <span><kbd>C</kbd> Camera</span>
-          <span><kbd>R</kbd> Reset</span>
-          <span><kbd>P</kbd> Pause</span>
+          <span><kbd>G</kbd> Smoke</span>
+          <span><kbd>N</kbd> World Map</span>
+          <span><kbd>C</kbd> Cam</span>
         </div>
       </div>
     </div>
 
-    <!-- On-Screen Touch Controls -->
+    <!-- On-Screen Mobile & Touch Flight Controls -->
     <div id="touch-controls">
-      <div class="touch-pad">
-        <div></div>
-        <button type="button" class="touch-btn" data-key="KeyS">NOSE DN</button>
-        <div></div>
-        <button type="button" class="touch-btn" data-key="KeyA">ROLL L</button>
-        <button type="button" class="touch-btn" data-key="KeyB">BRAKE</button>
-        <button type="button" class="touch-btn" data-key="KeyD">ROLL R</button>
-        <button type="button" class="touch-btn" data-key="KeyQ">YAW L</button>
-        <button type="button" class="touch-btn" data-key="KeyW">NOSE UP</button>
-        <button type="button" class="touch-btn" data-key="KeyE">YAW R</button>
+      <div class="mobile-left-cluster">
+        <!-- Analog Thumbstick for Mobile Pitch & Roll -->
+        <div id="mobile-joystick-zone">
+          <div class="joystick-crosshair"></div>
+          <span class="joystick-label">FLIGHT STICK</span>
+          <div id="mobile-joystick-knob"></div>
+        </div>
+
+        <!-- Classic D-Pad Buttons -->
+        <div class="touch-pad">
+          <div></div>
+          <button type="button" class="touch-btn" data-key="KeyS">NOSE DN</button>
+          <div></div>
+          <button type="button" class="touch-btn" data-key="KeyA">ROLL L</button>
+          <button type="button" class="touch-btn" data-key="KeyB">BRAKE</button>
+          <button type="button" class="touch-btn" data-key="KeyD">ROLL R</button>
+          <button type="button" class="touch-btn" data-key="KeyQ">YAW L</button>
+          <button type="button" class="touch-btn" data-key="KeyW">NOSE UP</button>
+          <button type="button" class="touch-btn" data-key="KeyE">YAW R</button>
+        </div>
       </div>
-      <div class="touch-actions">
-        <button type="button" class="touch-btn" data-key="ShiftLeft">THR +</button>
-        <button type="button" class="touch-btn" data-key="ControlLeft">THR -</button>
+
+      <div class="mobile-right-cluster">
+        <div class="touch-actions">
+          <button type="button" class="touch-btn orange" data-key="Space">BOOST</button>
+          <button type="button" class="touch-btn" id="btn-touch-smoke">SMOKE</button>
+          <button type="button" class="touch-btn" data-key="KeyQ">YAW L</button>
+          <button type="button" class="touch-btn" data-key="KeyE">YAW R</button>
+          <button type="button" class="touch-btn" data-key="ShiftLeft">THR +</button>
+          <button type="button" class="touch-btn" data-key="ControlLeft">THR -</button>
+          <button type="button" class="touch-btn" data-key="KeyB">BRAKE</button>
+          <button type="button" class="touch-btn" id="btn-touch-map">MAP</button>
+        </div>
+
+        <div class="mobile-throttle-box">
+          <span class="hud-label" style="font-size:0.55rem;">THR</span>
+          <input type="range" id="mobile-throttle-slider" min="0" max="100" value="45" />
+        </div>
       </div>
     </div>
 
@@ -194,7 +234,7 @@
             <button type="button" class="menu-btn primary" id="btn-start-free">
               <div>
                 <div>START FREE FLIGHT</div>
-                <div class="menu-btn-sub">Explore islands, mountains, downtown &amp; airports freely</div>
+                <div class="menu-btn-sub">Explore islands, aircraft carrier, airbases &amp; AI flights</div>
               </div>
               <span>&#9654;</span>
             </button>
@@ -215,21 +255,28 @@
             <button type="button" class="menu-btn" id="btn-open-aircraft">
               <div>
                 <div>AIRCRAFT SELECT</div>
-                <div class="menu-btn-sub">Choose from 3 specialized 3D aircrafts in the hangar</div>
+                <div class="menu-btn-sub">Choose from 8 aircrafts, stealth fighter jets &amp; airliners</div>
               </div>
               <span>&#9992;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-open-map-menu">
+              <div>
+                <div>WORLD MAP &amp; FAST TRAVEL</div>
+                <div class="menu-btn-sub">Inspect archipelago radar map, AI flights &amp; launch points</div>
+              </div>
+              <span>&#127758;</span>
             </button>
             <button type="button" class="menu-btn" id="btn-open-settings">
               <div>
                 <div>SETTINGS</div>
-                <div class="menu-btn-sub">Audio, graphics quality, flight controls &amp; save data</div>
+                <div class="menu-btn-sub">Audio, time of day, mobile controls &amp; save data</div>
               </div>
               <span>&#9881;</span>
             </button>
             <button type="button" class="menu-btn" id="btn-open-help">
               <div>
                 <div>HOW TO PLAY</div>
-                <div class="menu-btn-sub">Flight controls guide, mission rules &amp; landing tips</div>
+                <div class="menu-btn-sub">Flight controls guide, mobile stick &amp; landing tips</div>
               </div>
               <span>?</span>
             </button>
@@ -239,8 +286,8 @@
           <div class="career-card">
             <div>
               <div class="career-title">Pilot Career Logbook</div>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
-                Progress is saved automatically to your browser storage.
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                Progress is saved automatically. Play on desktop or mobile touch!
               </p>
             </div>
             <div class="career-stats-grid">
@@ -266,7 +313,7 @@
               </div>
               <div class="stat-tile">
                 <div class="hud-label">Hangar Fleet</div>
-                <div class="stat-tile-val">3 / 3 Ready</div>
+                <div class="stat-tile-val">8 / 8 Ready</div>
               </div>
             </div>
           </div>
@@ -274,23 +321,23 @@
       </div>
     </div>
 
-    <!-- AIRCRAFT SELECTION MODAL -->
+    <!-- AIRCRAFT & FIGHTER JET HANGAR SELECTION MODAL -->
     <div id="modal-aircraft" class="overlay-screen hidden">
       <div class="modal-card">
         <div class="modal-header">
-          <h2 class="modal-title">AIRCRAFT HANGAR SELECTION</h2>
+          <h2 class="modal-title">AIRCRAFT &amp; FIGHTER JET HANGAR (8 FLEET)</h2>
           <button type="button" class="btn-action" id="btn-close-aircraft">BACK TO MENU</button>
         </div>
         <div class="aircraft-grid">
           <div class="aircraft-card selected" data-aircraft="prop" id="card-aircraft-prop">
             <div class="aircraft-role">Propeller Trainer</div>
             <div class="aircraft-name">SkyHawk X1</div>
-            <p style="font-size:0.78rem; color:var(--text-muted);">
-              Signature blue, white &amp; orange agile single-engine prop plane. Ideal for island sightseeing and smooth landings.
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Agile single-engine prop plane in signature blue, white &amp; orange livery.
             </p>
             <div class="spec-row">
               <span>Max Speed: 320 km/h</span>
-              <div class="spec-bar"><div class="spec-bar-fill" style="width: 62%;"></div></div>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 38%;"></div></div>
             </div>
             <div class="spec-row">
               <span>Handling &amp; Lift: 95%</span>
@@ -301,32 +348,175 @@
           <div class="aircraft-card" data-aircraft="jet" id="card-aircraft-jet">
             <div class="aircraft-role">Modern Business Jet</div>
             <div class="aircraft-name">Citation Sovereign ZX</div>
-            <p style="font-size:0.78rem; color:var(--text-muted);">
-              Twin rear-turbofan executive jet with swept winglets and T-tail stabilizer. High cruise speed and stable pitch response.
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Twin rear-turbofan executive jet with swept winglets and T-tail stabilizer.
             </p>
             <div class="spec-row">
               <span>Max Speed: 460 km/h</span>
-              <div class="spec-bar"><div class="spec-bar-fill" style="width: 82%;"></div></div>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 54%;"></div></div>
             </div>
             <div class="spec-row">
-              <span>Handling &amp; Stability: 84%</span>
-              <div class="spec-bar"><div class="spec-bar-fill" style="width: 84%;"></div></div>
+              <span>Handling &amp; Stability: 86%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 86%;"></div></div>
             </div>
           </div>
 
           <div class="aircraft-card" data-aircraft="sport" id="card-aircraft-sport">
             <div class="aircraft-role">Fast Sporty Aircraft</div>
             <div class="aircraft-name">Viper Apex GT</div>
-            <p style="font-size:0.78rem; color:var(--text-muted);">
-              High-thrust delta-wing sport jet with twin tails and dynamic afterburner. Built for rapid rolls and checkpoint records.
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              High-thrust aerobatic delta jet with twin tails and glowing afterburner.
             </p>
             <div class="spec-row">
               <span>Max Speed: 560 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 66%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Roll Agility: 96%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 96%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="raptor" id="card-aircraft-raptor">
+            <div class="aircraft-role">5th-Gen Stealth Fighter</div>
+            <div class="aircraft-name">F-22X Raptor Stealth</div>
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Supersonic air-dominance stealth fighter with dual thrust-vectoring nozzles.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 880 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 96%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Super-Maneuverability: 99%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 99%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="felon" id="card-aircraft-felon">
+            <div class="aircraft-role">Supersonic Strike Fighter</div>
+            <div class="aircraft-name">Su-57 Felon Strike</div>
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Digital Arctic splinter camo stealth jet with extreme pitch &amp; roll authority.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 920 km/h</span>
               <div class="spec-bar"><div class="spec-bar-fill" style="width: 100%;"></div></div>
             </div>
             <div class="spec-row">
-              <span>Roll Agility: 98%</span>
+              <span>Roll &amp; Turn Rate: 100%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 100%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="tomcat" id="card-aircraft-tomcat">
+            <div class="aircraft-role">Carrier Interceptor Jet</div>
+            <div class="aircraft-name">F-14D Super Tomcat</div>
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Naval twin-engine swing-wing fighter built for carrier deck launches &amp; speed.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 840 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 91%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Carrier Deck Handling: 92%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 92%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="warthog" id="card-aircraft-warthog">
+            <div class="aircraft-role">Close Air Support Jet</div>
+            <div class="aircraft-name">A-10C Thunderbolt II</div>
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Armored attack jet with high-mounted twin turbofans, H-tail &amp; rotary nose cannon.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 520 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 60%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Low-Altitude Stability: 98%</span>
               <div class="spec-bar"><div class="spec-bar-fill" style="width: 98%;"></div></div>
+            </div>
+          </div>
+
+          <div class="aircraft-card" data-aircraft="airliner" id="card-aircraft-airliner">
+            <div class="aircraft-role">Heavy Widebody Airliner</div>
+            <div class="aircraft-name">SkyLiner A380 Titan</div>
+            <p style="font-size:0.74rem; color:var(--text-muted);">
+              Quad-turbofan commercial widebody jetliner with illuminated passenger decks.
+            </p>
+            <div class="spec-row">
+              <span>Max Speed: 620 km/h</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 72%;"></div></div>
+            </div>
+            <div class="spec-row">
+              <span>Cruise Smoothness: 94%</span>
+              <div class="spec-bar"><div class="spec-bar-fill" style="width: 94%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE TACTICAL WORLD MAP & FAST-TRAVEL MODAL -->
+    <div id="modal-map" class="overlay-screen hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">ARCHIPELAGO TACTICAL RADAR MAP &amp; FAST TRAVEL</h2>
+          <button type="button" class="btn-action" id="btn-close-map">CLOSE MAP</button>
+        </div>
+        <div class="map-modal-layout">
+          <div class="world-map-canvas-wrap">
+            <canvas id="world-map-canvas" width="520" height="520"></canvas>
+          </div>
+          <div class="map-sidebar">
+            <div class="career-title">Instant Spawn / Fast Travel</div>
+            <p style="font-size:0.76rem; color:var(--text-muted);">
+              Select any airbase, naval carrier, or landmark below to deploy your aircraft immediately:
+            </p>
+            <button type="button" class="menu-btn primary" id="btn-spawn-airport">
+              <div>
+                <div>SKYBOUND INTL AIRPORT (RWY 36)</div>
+                <div class="menu-btn-sub">Main Island asphalt runway threshold</div>
+              </div>
+              <span>&#9992;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-spawn-carrier">
+              <div>
+                <div>USS SKYBOUND AIRCRAFT CARRIER</div>
+                <div class="menu-btn-sub">Naval flight deck launch in West Ocean</div>
+              </div>
+              <span>&#9875;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-spawn-airbase">
+              <div>
+                <div>VALKYRIE FIGHTER AIRBASE</div>
+                <div class="menu-btn-sub">East Mesa military airstrip &amp; radar station</div>
+              </div>
+              <span>&#9733;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-spawn-mountain">
+              <div>
+                <div>MOUNT NIMBUS SUMMIT PASS</div>
+                <div class="menu-btn-sub">High-altitude canyon patrol at 420m</div>
+              </div>
+              <span>&#9650;</span>
+            </button>
+            <button type="button" class="menu-btn" id="btn-spawn-city">
+              <div>
+                <div>BAY CITY SKYLINE FLYOVER</div>
+                <div class="menu-btn-sub">Low-level approach over suspension bridge</div>
+              </div>
+              <span>&#127961;</span>
+            </button>
+
+            <div class="map-legend-grid">
+              <div><span class="legend-dot" style="background:#f97316;"></span>Your Aircraft</div>
+              <div><span class="legend-dot" style="background:#38bdf8;"></span>Runways &amp; Carrier</div>
+              <div><span class="legend-dot" style="background:#facc15;"></span>AI Fighter Flights</div>
+              <div><span class="legend-dot" style="background:#34d399;"></span>Checkpoints</div>
             </div>
           </div>
         </div>
@@ -357,6 +547,13 @@
           </div>
           <div class="setting-row">
             <div>
+              <div style="font-weight:700;">Atmosphere &amp; Time of Day</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Switch between Daylight, Golden Sunset, and Night Ops (Shortcut: T)</div>
+            </div>
+            <button type="button" class="btn-action orange" id="btn-setting-sky">TIME: DAYLIGHT</button>
+          </div>
+          <div class="setting-row">
+            <div>
               <div style="font-weight:700;">Invert Pitch Controls (W / S)</div>
               <div style="font-size:0.75rem; color:var(--text-muted);">Default: W = Pitch Up (Climb), S = Pitch Down (Dive)</div>
             </div>
@@ -364,8 +561,8 @@
           </div>
           <div class="setting-row">
             <div>
-              <div style="font-weight:700;">On-Screen Touch Controls</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">Show virtual flight pad on screen</div>
+              <div style="font-weight:700;">On-Screen Mobile Touch Controls</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Show virtual analog flight stick &amp; throttle slider on screen</div>
             </div>
             <button type="button" class="btn-action" id="btn-setting-touch">TOUCH PAD: AUTO</button>
           </div>
@@ -396,15 +593,19 @@
           <div class="control-item"><span>Yaw Right</span><span class="key-badge">E</span></div>
           <div class="control-item"><span>Increase Throttle</span><span class="key-badge">SHIFT</span></div>
           <div class="control-item"><span>Decrease Throttle</span><span class="key-badge">CTRL</span></div>
+          <div class="control-item"><span>Afterburner Boost</span><span class="key-badge">SPACE</span></div>
           <div class="control-item"><span>Airbrake / Wheel Brake</span><span class="key-badge">B</span></div>
+          <div class="control-item"><span>Aerobatic Smoke Trail</span><span class="key-badge">G</span></div>
+          <div class="control-item"><span>Tactical World Map</span><span class="key-badge">N / TAB</span></div>
+          <div class="control-item"><span>Time of Day Lighting</span><span class="key-badge">T</span></div>
           <div class="control-item"><span>Reset Aircraft</span><span class="key-badge">R</span></div>
           <div class="control-item"><span>Switch Camera View</span><span class="key-badge">C</span></div>
           <div class="control-item"><span>Pause / Resume</span><span class="key-badge">P</span></div>
           <div class="control-item"><span>Mute / Unmute Sound</span><span class="key-badge">M</span></div>
           <div class="control-item"><span>Fullscreen Mode</span><span class="key-badge">F</span></div>
         </div>
-        <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
-          <strong>Takeoff &amp; Flight Tips:</strong> Hold <strong>SHIFT</strong> to bring throttle to 80–100%. Once airspeed exceeds 115 km/h, hold <strong>W</strong> to pitch up and climb. For smooth landings in the <strong>Landing Challenge</strong>, align with the illuminated Runway 36 centerline, reduce throttle below 30%, use <strong>B</strong> (Airbrake) to maintain ~125–155 km/h, keep wings level, and hold <strong>B</strong> once on the asphalt until your aircraft comes to a full stop.
+        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
+          <strong>Mobile &amp; Desktop Flight Tips:</strong> On mobile or tablet, drag the left <strong>Analog Flight Stick</strong> to pitch and roll smoothly, slide the right <strong>THR</strong> bar to set engine power, and tap <strong>BOOST</strong> for supersonic afterburners. Click the bottom-left <strong>Radar Minimap</strong> (or press <strong>N</strong>) anytime to open the full archipelago map and fast-travel to the <strong>USS Skybound Aircraft Carrier</strong> or <strong>Valkyrie Fighter Airbase</strong>!
         </p>
       </div>
     </div>

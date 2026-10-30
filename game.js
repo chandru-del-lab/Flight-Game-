@@ -1,10 +1,16 @@
 import * as THREE from 'three';
 
 /**
- * SKYBOUND – ULTIMATE 3D FLIGHT EXPERIENCE
- * Complete 3D Flight Simulator Engine
- * Modules: StorageManager, AudioManager, AircraftBuilder, WorldGenerator,
- *          FlightPhysics, CameraManager, MissionManager, HUDController, Game
+ * SKYBOUND – ULTIMATE 3D FLIGHT EXPERIENCE (v2.0)
+ * Complete Desktop & Mobile 3D Flight Simulator & Fighter Jet Sandbox
+ * Features:
+ *  - 8 Playable Aircraft & Fighter Jets (SkyHawk X1, Citation ZX, Viper GT,
+ *    F-22X Raptor, Su-57 Felon, F-14D Tomcat, A-10C Warthog, SkyLiner A380)
+ *  - 14 Live AI Air Traffic & Fighter Squadron Flights in Open World
+ *  - 3 Landable Airfields / Decks: Intl Airport RWY 36, USS Skybound Carrier, Valkyrie Airbase
+ *  - Live HUD Radar Minimap + Full-Screen Interactive Tactical Map with Fast Travel
+ *  - Mobile Analog Virtual Flight Stick + Touch Throttle Slider + D-Pad
+ *  - Dynamic Time-of-Day (Daylight, Sunset, Night Ops) & Wingtip Smoke Contrails
  */
 
 const STORAGE_KEY = 'skybound_flight_save_v1';
@@ -16,16 +22,18 @@ const AIRCRAFT_SPECS = {
     role: 'Propeller Trainer',
     maxSpeedKmh: 320,
     cruiseSpeedKmh: 210,
-    minStallKmh: 92,
-    takeoffKmh: 105,
-    accelRate: 68,
-    brakeRate: 95,
-    pitchRate: 1.35,
-    rollRate: 2.25,
-    yawRate: 0.85,
-    liftFactor: 1.15,
+    minStallKmh: 88,
+    takeoffKmh: 102,
+    accelRate: 72,
+    brakeRate: 98,
+    pitchRate: 1.38,
+    rollRate: 2.3,
+    yawRate: 0.88,
+    liftFactor: 1.18,
     engineBaseFreq: 68,
-    engineType: 'prop'
+    engineType: 'prop',
+    smokeColor: 0x38bdf8,
+    wingSpan: 5.8
   },
   jet: {
     id: 'jet',
@@ -33,16 +41,18 @@ const AIRCRAFT_SPECS = {
     role: 'Modern Business Jet',
     maxSpeedKmh: 460,
     cruiseSpeedKmh: 310,
-    minStallKmh: 118,
-    takeoffKmh: 135,
-    accelRate: 92,
-    brakeRate: 115,
-    pitchRate: 1.25,
-    rollRate: 2.1,
-    yawRate: 0.78,
-    liftFactor: 1.05,
+    minStallKmh: 115,
+    takeoffKmh: 132,
+    accelRate: 96,
+    brakeRate: 118,
+    pitchRate: 1.28,
+    rollRate: 2.15,
+    yawRate: 0.8,
+    liftFactor: 1.06,
     engineBaseFreq: 135,
-    engineType: 'jet'
+    engineType: 'jet',
+    smokeColor: 0xe0f2fe,
+    wingSpan: 6.3
   },
   sport: {
     id: 'sport',
@@ -50,16 +60,113 @@ const AIRCRAFT_SPECS = {
     role: 'Fast Sporty Aircraft',
     maxSpeedKmh: 560,
     cruiseSpeedKmh: 380,
-    minStallKmh: 128,
-    takeoffKmh: 145,
-    accelRate: 125,
-    brakeRate: 140,
-    pitchRate: 1.65,
-    rollRate: 3.1,
-    yawRate: 0.98,
-    liftFactor: 1.08,
+    minStallKmh: 124,
+    takeoffKmh: 142,
+    accelRate: 130,
+    brakeRate: 145,
+    pitchRate: 1.68,
+    rollRate: 3.15,
+    yawRate: 1.0,
+    liftFactor: 1.1,
     engineBaseFreq: 165,
-    engineType: 'sport'
+    engineType: 'sport',
+    smokeColor: 0xf97316,
+    wingSpan: 5.2
+  },
+  raptor: {
+    id: 'raptor',
+    name: 'F-22X RAPTOR STEALTH',
+    role: '5th-Gen Stealth Fighter',
+    maxSpeedKmh: 880,
+    cruiseSpeedKmh: 540,
+    minStallKmh: 135,
+    takeoffKmh: 155,
+    accelRate: 210,
+    brakeRate: 185,
+    pitchRate: 2.05,
+    rollRate: 3.65,
+    yawRate: 1.15,
+    liftFactor: 1.14,
+    engineBaseFreq: 185,
+    engineType: 'fighter',
+    smokeColor: 0x38bdf8,
+    wingSpan: 5.8
+  },
+  felon: {
+    id: 'felon',
+    name: 'SU-57 FELON STRIKE',
+    role: 'Supersonic Strike Fighter',
+    maxSpeedKmh: 920,
+    cruiseSpeedKmh: 560,
+    minStallKmh: 132,
+    takeoffKmh: 152,
+    accelRate: 225,
+    brakeRate: 190,
+    pitchRate: 2.2,
+    rollRate: 3.85,
+    yawRate: 1.25,
+    liftFactor: 1.15,
+    engineBaseFreq: 192,
+    engineType: 'fighter',
+    smokeColor: 0xf43f5e,
+    wingSpan: 6.0
+  },
+  tomcat: {
+    id: 'tomcat',
+    name: 'F-14D SUPER TOMCAT',
+    role: 'Carrier Interceptor Jet',
+    maxSpeedKmh: 840,
+    cruiseSpeedKmh: 510,
+    minStallKmh: 130,
+    takeoffKmh: 148,
+    accelRate: 195,
+    brakeRate: 180,
+    pitchRate: 1.85,
+    rollRate: 3.35,
+    yawRate: 1.05,
+    liftFactor: 1.12,
+    engineBaseFreq: 175,
+    engineType: 'fighter',
+    smokeColor: 0xfacc15,
+    wingSpan: 6.4
+  },
+  warthog: {
+    id: 'warthog',
+    name: 'A-10C THUNDERBOLT II',
+    role: 'Close Air Support Jet',
+    maxSpeedKmh: 520,
+    cruiseSpeedKmh: 340,
+    minStallKmh: 102,
+    takeoffKmh: 118,
+    accelRate: 118,
+    brakeRate: 155,
+    pitchRate: 1.55,
+    rollRate: 2.6,
+    yawRate: 0.95,
+    liftFactor: 1.24,
+    engineBaseFreq: 122,
+    engineType: 'jet',
+    smokeColor: 0x10b981,
+    wingSpan: 6.6
+  },
+  airliner: {
+    id: 'airliner',
+    name: 'SKYLINER A380 TITAN',
+    role: 'Heavy Widebody Airliner',
+    maxSpeedKmh: 620,
+    cruiseSpeedKmh: 420,
+    minStallKmh: 138,
+    takeoffKmh: 158,
+    accelRate: 105,
+    brakeRate: 135,
+    pitchRate: 1.05,
+    rollRate: 1.55,
+    yawRate: 0.68,
+    liftFactor: 1.1,
+    engineBaseFreq: 110,
+    engineType: 'jet',
+    smokeColor: 0xffffff,
+    wingSpan: 8.6
   }
 };
 
@@ -74,11 +181,12 @@ class StorageManager {
       bestCheckpointTime: null,
       landings: 0,
       challengesCompleted: 0,
-      selectedAircraft: 'prop',
+      selectedAircraft: 'raptor',
       volume: 75,
       muted: false,
       invertPitch: false,
-      touchMode: 'auto'
+      touchMode: 'auto',
+      skyMode: 'DAY'
     };
     this.data = this.load();
   }
@@ -96,6 +204,7 @@ class StorageManager {
 
   save() {
     try {
+      window.localStorage.getItem(STORAGE_KEY);
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
     } catch (err) {
       // Ignore sandbox storage errors gracefully
@@ -107,7 +216,8 @@ class StorageManager {
       volume: this.data.volume,
       muted: this.data.muted,
       invertPitch: this.data.invertPitch,
-      touchMode: this.data.touchMode
+      touchMode: this.data.touchMode,
+      skyMode: this.data.skyMode
     };
     this.data = { ...this.defaultData, ...keepSettings };
     this.save();
@@ -148,7 +258,6 @@ class AudioManager {
       this.masterGain.connect(this.ctx.destination);
       this.updateMasterVolume();
 
-      // Engine harmonic oscillators
       this.engineGain = this.ctx.createGain();
       this.engineGain.gain.value = 0.001;
 
@@ -172,7 +281,7 @@ class AudioManager {
       this.engineOsc1.start();
       this.engineOsc2.start();
 
-      // Procedural wind rush noise
+      // Procedural wind rush & jet roar noise
       const bufferSize = this.ctx.sampleRate * 2;
       const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -187,7 +296,7 @@ class AudioManager {
       this.windFilter = this.ctx.createBiquadFilter();
       this.windFilter.type = 'bandpass';
       this.windFilter.frequency.value = 400;
-      this.windFilter.Q.value = 1.4;
+      this.windFilter.Q.value = 1.3;
 
       this.windGain = this.ctx.createGain();
       this.windGain.gain.value = 0.001;
@@ -209,7 +318,7 @@ class AudioManager {
     this.masterGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.05);
   }
 
-  updateFlightAudio(active, throttlePct, speedKmh, spec, isStalling) {
+  updateFlightAudio(active, throttlePct, speedKmh, spec, isStalling, afterburner) {
     if (!this.initialized || !this.ctx) return;
     const now = this.ctx.currentTime;
 
@@ -219,21 +328,21 @@ class AudioManager {
       return;
     }
 
-    const normThr = Math.max(0, Math.min(1, throttlePct / 100));
-    const normSpd = Math.max(0, Math.min(1.2, speedKmh / spec.maxSpeedKmh));
+    const normThr = Math.max(0, Math.min(1.25, throttlePct / 100));
+    const normSpd = Math.max(0, Math.min(1.3, speedKmh / spec.maxSpeedKmh));
     const baseFreq = spec.engineBaseFreq || 80;
+    const boostMult = afterburner ? 1.28 : 1.0;
 
-    const f1 = baseFreq * (0.65 + normThr * 1.45 + normSpd * 0.35);
+    const f1 = baseFreq * (0.65 + normThr * 1.45 + normSpd * 0.35) * boostMult;
     const f2 = f1 * (spec.engineType === 'prop' ? 1.5 : 2.02);
 
     this.engineOsc1.frequency.setTargetAtTime(f1, now, 0.06);
     this.engineOsc2.frequency.setTargetAtTime(f2, now, 0.06);
-    this.engineFilter.frequency.setTargetAtTime(240 + normThr * 950, now, 0.08);
+    this.engineFilter.frequency.setTargetAtTime((260 + normThr * 1050) * boostMult, now, 0.08);
     this.engineGain.gain.setTargetAtTime(0.06 + normThr * 0.16, now, 0.08);
 
-    // Wind rush proportional to airspeed
-    this.windFilter.frequency.setTargetAtTime(280 + normSpd * 1100, now, 0.1);
-    this.windGain.gain.setTargetAtTime(Math.min(0.22, normSpd * 0.18), now, 0.1);
+    this.windFilter.frequency.setTargetAtTime(280 + normSpd * 1250, now, 0.1);
+    this.windGain.gain.setTargetAtTime(Math.min(0.26, normSpd * 0.2 + (afterburner ? 0.06 : 0)), now, 0.1);
 
     if (isStalling && performance.now() - this.lastStallBeep > 420) {
       this.lastStallBeep = performance.now();
@@ -292,7 +401,7 @@ class AudioManager {
 }
 
 /* ============================================================================
-   3. PROCEDURAL 3D AIRCRAFT BUILDER
+   3. PROCEDURAL 3D AIRCRAFT & FIGHTER JET BUILDER (8 Detailed Models)
    ============================================================================ */
 class AircraftBuilder {
   static createStripeTexture(primaryHex, stripeHex, accentHex) {
@@ -304,11 +413,31 @@ class AircraftBuilder {
     ctx.fillRect(0, 0, 256, 256);
 
     ctx.fillStyle = stripeHex;
-    ctx.fillRect(0, 95, 256, 36);
+    ctx.fillRect(0, 92, 256, 38);
 
     ctx.fillStyle = accentHex;
-    ctx.fillRect(0, 131, 256, 18);
+    ctx.fillRect(0, 130, 256, 18);
 
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  static createCamoTexture(c1, c2, c3) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = c1;
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = c2;
+    for (let i = 0; i < 14; i++) {
+      ctx.fillRect((i * 53) % 220, (i * 79) % 220, 68, 42);
+    }
+    ctx.fillStyle = c3;
+    for (let i = 0; i < 10; i++) {
+      ctx.fillRect((i * 89) % 210, (i * 47) % 210, 48, 30);
+    }
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
     return tex;
@@ -318,22 +447,40 @@ class AircraftBuilder {
     const root = new THREE.Group();
     const parts = {
       propeller: null,
-      afterburner: null,
+      afterburners: [],
       leftAileron: null,
       rightAileron: null,
       elevators: [],
       rudders: []
     };
 
-    if (type === 'jet') {
-      this.buildBusinessJet(root, parts);
-    } else if (type === 'sport') {
-      this.buildSportJet(root, parts);
-    } else {
-      this.buildPropAircraft(root, parts);
+    switch (type) {
+      case 'jet':
+        this.buildBusinessJet(root, parts);
+        break;
+      case 'sport':
+        this.buildSportJet(root, parts);
+        break;
+      case 'raptor':
+        this.buildRaptorFighter(root, parts);
+        break;
+      case 'felon':
+        this.buildFelonFighter(root, parts);
+        break;
+      case 'tomcat':
+        this.buildTomcatFighter(root, parts);
+        break;
+      case 'warthog':
+        this.buildWarthogJet(root, parts);
+        break;
+      case 'airliner':
+        this.buildWidebodyAirliner(root, parts);
+        break;
+      default:
+        this.buildPropAircraft(root, parts);
+        break;
     }
 
-    // Add standard navigation and strobe lights
     this.addNavigationLights(root, type);
 
     root.traverse((obj) => {
@@ -347,8 +494,34 @@ class AircraftBuilder {
     return root;
   }
 
+  static createAfterburnerCone(colorHex = 0xff7b00, radius = 0.36, length = 2.4) {
+    const group = new THREE.Group();
+    const outerMat = new THREE.MeshBasicMaterial({
+      color: colorHex,
+      transparent: true,
+      opacity: 0.85
+    });
+    const innerMat = new THREE.MeshBasicMaterial({
+      color: 0xe0f2fe,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    const outerGeo = new THREE.ConeGeometry(radius, length, 14);
+    outerGeo.rotateX(Math.PI / 2);
+    const outer = new THREE.Mesh(outerGeo, outerMat);
+    outer.position.z = length * 0.45;
+
+    const innerGeo = new THREE.ConeGeometry(radius * 0.55, length * 0.65, 12);
+    innerGeo.rotateX(Math.PI / 2);
+    const inner = new THREE.Mesh(innerGeo, innerMat);
+    inner.position.z = length * 0.3;
+
+    group.add(outer, inner);
+    return group;
+  }
+
   static buildPropAircraft(root, parts) {
-    // Default aircraft: Blue, White, and Orange livery
     const fuselageTex = this.createStripeTexture('#ffffff', '#1e6fff', '#ff6b1a');
     const matWhite = new THREE.MeshStandardMaterial({ map: fuselageTex, roughness: 0.3, metalness: 0.15 });
     const matBlue = new THREE.MeshStandardMaterial({ color: 0x1e6fff, roughness: 0.32, metalness: 0.2 });
@@ -363,47 +536,40 @@ class AircraftBuilder {
       opacity: 0.68
     });
 
-    // Forward & Main Fuselage (oriented along -Z forward)
     const mainBodyGeo = new THREE.CylinderGeometry(0.68, 0.78, 3.6, 16);
     mainBodyGeo.rotateX(Math.PI / 2);
     const mainBody = new THREE.Mesh(mainBodyGeo, matWhite);
     mainBody.position.set(0, 0, -0.2);
     root.add(mainBody);
 
-    // Tapered Rear Fuselage
     const rearBodyGeo = new THREE.CylinderGeometry(0.78, 0.25, 3.8, 16);
     rearBodyGeo.rotateX(Math.PI / 2);
     const rearBody = new THREE.Mesh(rearBodyGeo, matWhite);
     rearBody.position.set(0, 0.06, 3.5);
     root.add(rearBody);
 
-    // Nose Engine Cowling (Blue & Orange)
     const cowlGeo = new THREE.CylinderGeometry(0.45, 0.68, 1.3, 16);
     cowlGeo.rotateX(Math.PI / 2);
     const cowl = new THREE.Mesh(cowlGeo, matBlue);
     cowl.position.set(0, -0.02, -2.65);
     root.add(cowl);
 
-    // Cockpit Glass Canopy
     const canopyGeo = new THREE.SphereGeometry(0.66, 16, 12);
     canopyGeo.scale(0.88, 0.72, 2.35);
     const canopy = new THREE.Mesh(canopyGeo, matGlass);
     canopy.position.set(0, 0.52, -0.25);
     root.add(canopy);
 
-    // Main Wings (Swept & tapered visual with orange tips)
     const wingGeo = new THREE.BoxGeometry(11.4, 0.14, 1.55);
     const mainWing = new THREE.Mesh(wingGeo, matWhite);
     mainWing.position.set(0, 0.12, -0.35);
     root.add(mainWing);
 
-    // Blue Wing Leading Stripe
     const stripeGeo = new THREE.BoxGeometry(11.45, 0.15, 0.38);
     const wingStripe = new THREE.Mesh(stripeGeo, matBlue);
     wingStripe.position.set(0, 0.125, -0.92);
     root.add(wingStripe);
 
-    // Wingtips (Orange)
     const tipGeo = new THREE.BoxGeometry(0.55, 0.22, 1.58);
     const leftTip = new THREE.Mesh(tipGeo, matOrange);
     leftTip.position.set(-5.85, 0.18, -0.35);
@@ -413,7 +579,6 @@ class AircraftBuilder {
     rightTip.rotation.z = -0.25;
     root.add(leftTip, rightTip);
 
-    // Articulated Ailerons
     const aileronGeo = new THREE.BoxGeometry(2.4, 0.08, 0.34);
     const leftAileron = new THREE.Mesh(aileronGeo, matOrange);
     leftAileron.position.set(-3.9, 0.11, 0.56);
@@ -423,21 +588,18 @@ class AircraftBuilder {
     parts.leftAileron = leftAileron;
     parts.rightAileron = rightAileron;
 
-    // Vertical Tail Fin
     const vTailGeo = new THREE.BoxGeometry(0.16, 1.75, 1.35);
     const vTail = new THREE.Mesh(vTailGeo, matBlue);
     vTail.position.set(0, 0.98, 4.75);
     vTail.rotation.x = -0.22;
     root.add(vTail);
 
-    // Rudder
     const rudderGeo = new THREE.BoxGeometry(0.12, 1.65, 0.42);
     const rudder = new THREE.Mesh(rudderGeo, matOrange);
     rudder.position.set(0, 0.96, 5.48);
     root.add(rudder);
     parts.rudders.push(rudder);
 
-    // Horizontal Stabilizers & Elevators
     const hStabGeo = new THREE.BoxGeometry(3.7, 0.11, 0.95);
     const hStab = new THREE.Mesh(hStabGeo, matWhite);
     hStab.position.set(0, 0.26, 4.85);
@@ -449,7 +611,6 @@ class AircraftBuilder {
     root.add(elevator);
     parts.elevators.push(elevator);
 
-    // Propeller Assembly (Nose Spinner + 3 Blades)
     const propGroup = new THREE.Group();
     propGroup.position.set(0, -0.02, -3.35);
 
@@ -468,7 +629,6 @@ class AircraftBuilder {
     root.add(propGroup);
     parts.propeller = propGroup;
 
-    // Tricycle Landing Gear
     this.addLandingGear(root, matChrome, matDark, matBlue);
   }
 
@@ -487,41 +647,35 @@ class AircraftBuilder {
       opacity: 0.72
     });
 
-    // Sleek Elongated Cabin
     const cabinGeo = new THREE.CylinderGeometry(0.76, 0.76, 6.2, 18);
     cabinGeo.rotateX(Math.PI / 2);
     const cabin = new THREE.Mesh(cabinGeo, matWhite);
     cabin.position.set(0, 0, 0.3);
     root.add(cabin);
 
-    // Aerodynamic Nose Cone
     const noseGeo = new THREE.ConeGeometry(0.76, 2.5, 18);
     noseGeo.rotateX(-Math.PI / 2);
     const nose = new THREE.Mesh(noseGeo, matWhite);
     nose.position.set(0, 0, -4.05);
     root.add(nose);
 
-    // Tail Cone
     const tailConeGeo = new THREE.CylinderGeometry(0.76, 0.22, 3.2, 18);
     tailConeGeo.rotateX(Math.PI / 2);
     const tailCone = new THREE.Mesh(tailConeGeo, matWhite);
     tailCone.position.set(0, 0.1, 5.0);
     root.add(tailCone);
 
-    // Cockpit Windshield
     const visorGeo = new THREE.SphereGeometry(0.72, 16, 12);
     visorGeo.scale(0.92, 0.62, 1.9);
     const visor = new THREE.Mesh(visorGeo, matGlass);
     visor.position.set(0, 0.36, -2.1);
     root.add(visor);
 
-    // Swept Low Wings
     const wingShape = new THREE.BoxGeometry(12.6, 0.14, 1.7);
     const wing = new THREE.Mesh(wingShape, matWhite);
     wing.position.set(0, -0.32, 0.35);
     root.add(wing);
 
-    // Upturned Winglets
     const wingletGeo = new THREE.BoxGeometry(0.16, 1.15, 0.9);
     const leftWinglet = new THREE.Mesh(wingletGeo, matCyan);
     leftWinglet.position.set(-6.3, 0.2, 0.35);
@@ -531,7 +685,6 @@ class AircraftBuilder {
     rightWinglet.rotation.z = 0.18;
     root.add(leftWinglet, rightWinglet);
 
-    // Ailerons
     const aileronGeo = new THREE.BoxGeometry(2.6, 0.08, 0.35);
     const leftAileron = new THREE.Mesh(aileronGeo, matCyan);
     leftAileron.position.set(-4.3, -0.32, 1.32);
@@ -541,30 +694,20 @@ class AircraftBuilder {
     parts.leftAileron = leftAileron;
     parts.rightAileron = rightAileron;
 
-    // Twin Rear Turbofan Nacelles
     const nacelleGeo = new THREE.CylinderGeometry(0.44, 0.38, 2.2, 16);
     nacelleGeo.rotateX(Math.PI / 2);
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-    const glowGeo = new THREE.CircleGeometry(0.32, 12);
 
     [-1.15, 1.15].forEach((xOffset) => {
       const nacelle = new THREE.Mesh(nacelleGeo, matNavy);
       nacelle.position.set(xOffset, 0.35, 3.65);
       root.add(nacelle);
 
-      const intakeRing = new THREE.Mesh(
-        new THREE.TorusGeometry(0.42, 0.05, 10, 20),
-        matChrome
-      );
-      intakeRing.position.set(xOffset, 0.35, 2.55);
-      root.add(intakeRing);
-
-      const exhaustGlow = new THREE.Mesh(glowGeo, glowMat);
-      exhaustGlow.position.set(xOffset, 0.35, 4.76);
-      root.add(exhaustGlow);
+      const ab = this.createAfterburnerCone(0x38bdf8, 0.28, 1.4);
+      ab.position.set(xOffset, 0.35, 4.75);
+      root.add(ab);
+      parts.afterburners.push(ab);
     });
 
-    // T-Tail Fin & High Horizontal Stabilizer
     const vFinGeo = new THREE.BoxGeometry(0.18, 2.2, 1.6);
     const vFin = new THREE.Mesh(vFinGeo, matNavy);
     vFin.position.set(0, 1.25, 5.55);
@@ -603,34 +746,29 @@ class AircraftBuilder {
       opacity: 0.68
     });
 
-    // Sleek Fighter Fuselage
     const coreGeo = new THREE.CylinderGeometry(0.58, 0.72, 5.6, 16);
     coreGeo.rotateX(Math.PI / 2);
     const core = new THREE.Mesh(coreGeo, matBody);
     core.position.set(0, 0, 0.2);
     root.add(core);
 
-    // Sharp Radome Nose
     const noseGeo = new THREE.ConeGeometry(0.58, 2.9, 16);
     noseGeo.rotateX(-Math.PI / 2);
     const nose = new THREE.Mesh(noseGeo, matRed);
     nose.position.set(0, -0.02, -4.05);
     root.add(nose);
 
-    // Bubble Canopy
     const canopyGeo = new THREE.SphereGeometry(0.58, 16, 12);
     canopyGeo.scale(0.86, 0.72, 2.5);
     const canopy = new THREE.Mesh(canopyGeo, matGlass);
     canopy.position.set(0, 0.46, -1.05);
     root.add(canopy);
 
-    // Delta Main Wings
     const wingGeo = new THREE.BoxGeometry(10.4, 0.12, 2.35);
     const wing = new THREE.Mesh(wingGeo, matBody);
     wing.position.set(0, -0.05, 0.75);
     root.add(wing);
 
-    // Wingtip Aerobatic Pods
     const podGeo = new THREE.CylinderGeometry(0.12, 0.12, 2.2, 10);
     podGeo.rotateX(Math.PI / 2);
     const leftPod = new THREE.Mesh(podGeo, matOrange);
@@ -639,7 +777,6 @@ class AircraftBuilder {
     rightPod.position.set(5.25, -0.05, 0.65);
     root.add(leftPod, rightPod);
 
-    // Ailerons
     const aileronGeo = new THREE.BoxGeometry(2.5, 0.08, 0.38);
     const leftAileron = new THREE.Mesh(aileronGeo, matOrange);
     leftAileron.position.set(-3.5, -0.05, 2.05);
@@ -649,7 +786,6 @@ class AircraftBuilder {
     parts.leftAileron = leftAileron;
     parts.rightAileron = rightAileron;
 
-    // Twin Canted Vertical Stabilizers
     const finGeo = new THREE.BoxGeometry(0.14, 1.65, 1.45);
     [-0.65, 0.65].forEach((xPos, idx) => {
       const fin = new THREE.Mesh(finGeo, matRed);
@@ -665,40 +801,450 @@ class AircraftBuilder {
       parts.rudders.push(rudder);
     });
 
-    // All-Moving Tailplanes / Elevators
     const elevGeo = new THREE.BoxGeometry(3.8, 0.1, 0.85);
     const elevator = new THREE.Mesh(elevGeo, matRed);
     elevator.position.set(0, -0.04, 3.25);
     root.add(elevator);
     parts.elevators.push(elevator);
 
-    // Afterburner Exhaust Nozzle & Dynamic Flame Cone
     const nozzleGeo = new THREE.CylinderGeometry(0.58, 0.46, 0.95, 16);
     nozzleGeo.rotateX(Math.PI / 2);
     const nozzle = new THREE.Mesh(nozzleGeo, matDark);
     nozzle.position.set(0, 0, 3.45);
     root.add(nozzle);
 
-    const flameGeo = new THREE.ConeGeometry(0.4, 2.2, 14);
-    flameGeo.rotateX(Math.PI / 2);
-    const flameMat = new THREE.MeshBasicMaterial({
-      color: 0xff7b00,
-      transparent: true,
-      opacity: 0.85
-    });
-    const flame = new THREE.Mesh(flameGeo, flameMat);
-    flame.position.set(0, 0, 4.65);
+    const flame = this.createAfterburnerCone(0xff7b00, 0.42, 2.5);
+    flame.position.set(0, 0, 3.95);
     root.add(flame);
-    parts.afterburner = flame;
+    parts.afterburners.push(flame);
 
     this.addLandingGear(root, matChrome, matDark, matRed);
+  }
+
+  static buildRaptorFighter(root, parts) {
+    // F-22X Raptor Stealth Fighter: Tactical Slate Camo, Diamond Delta Wings, Twin Canted Tails, Dual Vectoring Nozzles
+    const camoTex = this.createCamoTexture('#334155', '#475569', '#1e293b');
+    const matStealth = new THREE.MeshStandardMaterial({ map: camoTex, roughness: 0.35, metalness: 0.55 });
+    const matEdge = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.3, metalness: 0.6 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.6 });
+    const matGoldCanopy = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      roughness: 0.08,
+      metalness: 0.88,
+      transparent: true,
+      opacity: 0.68
+    });
+
+    // Stealth Blended Fuselage with Chine Edges
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.68, 6.4), matStealth);
+    body.position.set(0, 0, 0.2);
+    root.add(body);
+
+    // Chined Stealth Radome Nose
+    const noseGeo = new THREE.ConeGeometry(1.15, 3.4, 4);
+    noseGeo.rotateY(Math.PI / 4);
+    noseGeo.rotateX(-Math.PI / 2);
+    noseGeo.scale(1.0, 0.52, 1.0);
+    const nose = new THREE.Mesh(noseGeo, matStealth);
+    nose.position.set(0, 0, -4.6);
+    root.add(nose);
+
+    // Gold-Tinted Stealth Bubble Canopy
+    const canopyGeo = new THREE.SphereGeometry(0.66, 16, 12);
+    canopyGeo.scale(0.88, 0.68, 2.55);
+    const canopy = new THREE.Mesh(canopyGeo, matGoldCanopy);
+    canopy.position.set(0, 0.48, -1.35);
+    root.add(canopy);
+
+    // Wide Diamond Delta Wings
+    const mainWing = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.12, 3.2), matStealth);
+    mainWing.position.set(0, 0.05, 0.85);
+    root.add(mainWing);
+
+    const aileronGeo = new THREE.BoxGeometry(2.8, 0.08, 0.42);
+    const leftAileron = new THREE.Mesh(aileronGeo, matEdge);
+    leftAileron.position.set(-3.8, 0.05, 2.62);
+    const rightAileron = new THREE.Mesh(aileronGeo, matEdge);
+    rightAileron.position.set(3.8, 0.05, 2.62);
+    root.add(leftAileron, rightAileron);
+    parts.leftAileron = leftAileron;
+    parts.rightAileron = rightAileron;
+
+    // Twin Outward-Canted Vertical Tails
+    const tailGeo = new THREE.BoxGeometry(0.16, 1.95, 1.85);
+    [-0.95, 0.95].forEach((xPos, idx) => {
+      const fin = new THREE.Mesh(tailGeo, matStealth);
+      fin.position.set(xPos, 0.96, 2.85);
+      fin.rotation.z = idx === 0 ? 0.34 : -0.34;
+      fin.rotation.x = -0.22;
+      root.add(fin);
+
+      const rudder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.7, 0.42), matEdge);
+      rudder.position.set(xPos * 1.18, 0.92, 3.85);
+      rudder.rotation.z = idx === 0 ? 0.34 : -0.34;
+      root.add(rudder);
+      parts.rudders.push(rudder);
+    });
+
+    // Horizontal Stabilators
+    const stab = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.1, 1.35), matEdge);
+    stab.position.set(0, 0.02, 3.65);
+    root.add(stab);
+    parts.elevators.push(stab);
+
+    // Dual Rectangular Thrust-Vectoring Nozzles + Twin Afterburners
+    [-0.58, 0.58].forEach((xPos) => {
+      const nozzle = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.42, 0.9), matDark);
+      nozzle.position.set(xPos, 0, 3.7);
+      root.add(nozzle);
+
+      const flame = this.createAfterburnerCone(0x38bdf8, 0.34, 2.8);
+      flame.position.set(xPos, 0, 4.15);
+      root.add(flame);
+      parts.afterburners.push(flame);
+    });
+
+    this.addLandingGear(root, matEdge, matDark, matStealth);
+  }
+
+  static buildFelonFighter(root, parts) {
+    // Su-57 Felon Strike Fighter: Digital Blue/White/Gray Splinter Camo, Twin Circular Plasma Afterburners
+    const camoTex = this.createCamoTexture('#1e3a8a', '#bae6fd', '#334155');
+    const matCamo = new THREE.MeshStandardMaterial({ map: camoTex, roughness: 0.3, metalness: 0.45 });
+    const matCyan = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.25, metalness: 0.45 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.6 });
+    const matGlass = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.08,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.7
+    });
+
+    const core = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.58, 6.6), matCamo);
+    core.position.set(0, 0, 0.3);
+    root.add(core);
+
+    const noseGeo = new THREE.ConeGeometry(0.78, 3.5, 16);
+    noseGeo.rotateX(-Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, matCamo);
+    nose.position.set(0, -0.02, -4.65);
+    root.add(nose);
+
+    const canopyGeo = new THREE.SphereGeometry(0.62, 16, 12);
+    canopyGeo.scale(0.85, 0.68, 2.4);
+    const canopy = new THREE.Mesh(canopyGeo, matGlass);
+    canopy.position.set(0, 0.44, -1.4);
+    root.add(canopy);
+
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(12.0, 0.12, 3.4), matCamo);
+    wing.position.set(0, 0.02, 0.95);
+    root.add(wing);
+
+    // Wingtip Air-to-Air Missiles
+    const missileGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.4, 8);
+    missileGeo.rotateX(Math.PI / 2);
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
+    [-6.05, 6.05].forEach((xPos) => {
+      const m = new THREE.Mesh(missileGeo, whiteMat);
+      m.position.set(xPos, -0.05, 0.9);
+      root.add(m);
+    });
+
+    const aileronGeo = new THREE.BoxGeometry(2.9, 0.08, 0.4);
+    const leftAileron = new THREE.Mesh(aileronGeo, matCyan);
+    leftAileron.position.set(-4.0, 0.02, 2.8);
+    const rightAileron = new THREE.Mesh(aileronGeo, matCyan);
+    rightAileron.position.set(4.0, 0.02, 2.8);
+    root.add(leftAileron, rightAileron);
+    parts.leftAileron = leftAileron;
+    parts.rightAileron = rightAileron;
+
+    [-1.05, 1.05].forEach((xPos, idx) => {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.75, 1.65), matCamo);
+      fin.position.set(xPos, 0.84, 2.95);
+      fin.rotation.z = idx === 0 ? 0.3 : -0.3;
+      root.add(fin);
+      parts.rudders.push(fin);
+    });
+
+    const elev = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.1, 1.2), matCamo);
+    elev.position.set(0, 0, 3.75);
+    root.add(elev);
+    parts.elevators.push(elev);
+
+    [-0.65, 0.65].forEach((xPos) => {
+      const nozGeo = new THREE.CylinderGeometry(0.42, 0.36, 1.1, 14);
+      nozGeo.rotateX(Math.PI / 2);
+      const noz = new THREE.Mesh(nozGeo, matDark);
+      noz.position.set(xPos, 0, 3.85);
+      root.add(noz);
+
+      const flame = this.createAfterburnerCone(0xff5500, 0.36, 2.9);
+      flame.position.set(xPos, 0, 4.35);
+      root.add(flame);
+      parts.afterburners.push(flame);
+    });
+
+    this.addLandingGear(root, matCyan, matDark, matCamo);
+  }
+
+  static buildTomcatFighter(root, parts) {
+    // F-14D Super Tomcat: Naval Gull Gray, Twin Engine Nacelles, Swept Wings, Jolly Rogers Black/Gold Tails
+    const matGray = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.35, metalness: 0.35 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.45, metalness: 0.4 });
+    const matGold = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.5 });
+    const matGlass = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.1,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.68
+    });
+
+    // Twin Engine Nacelles + Center Pancake Fuselage
+    const centerDeck = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.52, 6.2), matGray);
+    centerDeck.position.set(0, 0.08, 0.3);
+    root.add(centerDeck);
+
+    [-0.82, 0.82].forEach((xPos) => {
+      const nacelle = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.68, 5.8), matGray);
+      nacelle.position.set(xPos, -0.12, 0.6);
+      root.add(nacelle);
+
+      const flame = this.createAfterburnerCone(0xf97316, 0.35, 2.6);
+      flame.position.set(xPos, -0.12, 3.6);
+      root.add(flame);
+      parts.afterburners.push(flame);
+    });
+
+    const noseGeo = new THREE.ConeGeometry(0.68, 3.4, 16);
+    noseGeo.rotateX(-Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, matDark);
+    nose.position.set(0, 0.02, -4.4);
+    root.add(nose);
+
+    const canopyGeo = new THREE.SphereGeometry(0.62, 16, 12);
+    canopyGeo.scale(0.84, 0.72, 2.75);
+    const canopy = new THREE.Mesh(canopyGeo, matGlass);
+    canopy.position.set(0, 0.48, -1.25);
+    root.add(canopy);
+
+    // Variable-Sweep Style Main Wings
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(12.8, 0.14, 1.95), matGray);
+    wing.position.set(0, 0.22, 0.4);
+    root.add(wing);
+
+    const aileronGeo = new THREE.BoxGeometry(2.8, 0.08, 0.36);
+    const leftAileron = new THREE.Mesh(aileronGeo, matGold);
+    leftAileron.position.set(-4.4, 0.22, 1.5);
+    const rightAileron = new THREE.Mesh(aileronGeo, matGold);
+    rightAileron.position.set(4.4, 0.22, 1.5);
+    root.add(leftAileron, rightAileron);
+    parts.leftAileron = leftAileron;
+    parts.rightAileron = rightAileron;
+
+    // Twin Squadron Tails (Black with Gold tips)
+    [-0.95, 0.95].forEach((xPos, idx) => {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.05, 1.65), matDark);
+      fin.position.set(xPos, 1.05, 2.85);
+      fin.rotation.z = idx === 0 ? 0.12 : -0.12;
+      root.add(fin);
+
+      const tip = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.32, 1.65), matGold);
+      tip.position.set(xPos * 1.08, 2.05, 2.85);
+      root.add(tip);
+
+      const rudder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.85, 0.38), matGold);
+      rudder.position.set(xPos * 1.05, 1.0, 3.78);
+      root.add(rudder);
+      parts.rudders.push(rudder);
+    });
+
+    const stab = new THREE.Mesh(new THREE.BoxGeometry(5.0, 0.1, 1.25), matGray);
+    stab.position.set(0, -0.05, 3.25);
+    root.add(stab);
+    parts.elevators.push(stab);
+
+    this.addLandingGear(root, matGray, matDark, matGold);
+  }
+
+  static buildWarthogJet(root, parts) {
+    // A-10C Thunderbolt II Warthog: High Twin Turbofans, Straight Wing with Ordnance, H-Tail, Rotary Cannon
+    const matOlive = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.65, metalness: 0.25 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.4 });
+    const matAccent = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.4, metalness: 0.3 });
+    const matGlass = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.12,
+      metalness: 0.75,
+      transparent: true,
+      opacity: 0.68
+    });
+
+    const fuselageGeo = new THREE.CylinderGeometry(0.68, 0.62, 6.8, 16);
+    fuselageGeo.rotateX(Math.PI / 2);
+    const fuselage = new THREE.Mesh(fuselageGeo, matOlive);
+    fuselage.position.set(0, 0, 0.4);
+    root.add(fuselage);
+
+    const noseGeo = new THREE.ConeGeometry(0.68, 2.1, 16);
+    noseGeo.rotateX(-Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, matOlive);
+    nose.position.set(0, 0, -4.0);
+    root.add(nose);
+
+    // GAU-8 30mm Nose Rotary Cannon Barrel
+    const gunGeo = new THREE.CylinderGeometry(0.14, 0.14, 1.4, 10);
+    gunGeo.rotateX(Math.PI / 2);
+    const gun = new THREE.Mesh(gunGeo, matDark);
+    gun.position.set(0, -0.22, -5.15);
+    root.add(gun);
+
+    const canopyGeo = new THREE.SphereGeometry(0.6, 14, 12);
+    canopyGeo.scale(0.84, 0.75, 2.1);
+    const canopy = new THREE.Mesh(canopyGeo, matGlass);
+    canopy.position.set(0, 0.52, -1.65);
+    root.add(canopy);
+
+    // Wide Straight Attack Wings
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(13.2, 0.18, 1.85), matOlive);
+    wing.position.set(0, -0.22, 0.1);
+    root.add(wing);
+
+    const aileronGeo = new THREE.BoxGeometry(2.8, 0.1, 0.38);
+    const leftAileron = new THREE.Mesh(aileronGeo, matAccent);
+    leftAileron.position.set(-4.6, -0.22, 1.15);
+    const rightAileron = new THREE.Mesh(aileronGeo, matAccent);
+    rightAileron.position.set(4.6, -0.22, 1.15);
+    root.add(leftAileron, rightAileron);
+    parts.leftAileron = leftAileron;
+    parts.rightAileron = rightAileron;
+
+    // High Twin Turbofan Nacelles Behind Wings
+    const nacGeo = new THREE.CylinderGeometry(0.62, 0.54, 2.4, 16);
+    nacGeo.rotateX(Math.PI / 2);
+    [-1.25, 1.25].forEach((xPos) => {
+      const nac = new THREE.Mesh(nacGeo, matOlive);
+      nac.position.set(xPos, 0.68, 2.25);
+      root.add(nac);
+
+      const ab = this.createAfterburnerCone(0x38bdf8, 0.32, 1.3);
+      ab.position.set(xPos, 0.68, 3.45);
+      root.add(ab);
+      parts.afterburners.push(ab);
+    });
+
+    // H-Tail Horizontal Stabilizer & Twin Vertical Rudders
+    const hTail = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.14, 1.15), matOlive);
+    hTail.position.set(0, 0.25, 4.15);
+    root.add(hTail);
+    parts.elevators.push(hTail);
+
+    [-2.25, 2.25].forEach((xPos) => {
+      const vFin = new THREE.Mesh(new THREE.BoxGeometry(0.16, 1.95, 1.35), matOlive);
+      vFin.position.set(xPos, 0.75, 4.15);
+      root.add(vFin);
+
+      const rud = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.85, 0.36), matAccent);
+      rud.position.set(xPos, 0.75, 4.95);
+      root.add(rud);
+      parts.rudders.push(rud);
+    });
+
+    this.addLandingGear(root, matDark, matDark, matAccent);
+  }
+
+  static buildWidebodyAirliner(root, parts) {
+    // SkyLiner A380 Titan: Double-Deck Widebody Fuselage + 4 Under-Wing Turbofans
+    const fuselageTex = this.createStripeTexture('#ffffff', '#0284c7', '#f59e0b');
+    const matWhite = new THREE.MeshStandardMaterial({ map: fuselageTex, roughness: 0.2, metalness: 0.2 });
+    const matBlue = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.25, metalness: 0.3 });
+    const matGold = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.25, metalness: 0.4 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.4 });
+    const matGlass = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.1,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.75
+    });
+
+    const cabinGeo = new THREE.CylinderGeometry(1.12, 1.12, 8.2, 20);
+    cabinGeo.rotateX(Math.PI / 2);
+    cabinGeo.scale(0.92, 1.12, 1.0);
+    const cabin = new THREE.Mesh(cabinGeo, matWhite);
+    cabin.position.set(0, 0.15, 0.4);
+    root.add(cabin);
+
+    const noseGeo = new THREE.SphereGeometry(1.12, 18, 14);
+    noseGeo.scale(0.92, 1.1, 1.9);
+    const nose = new THREE.Mesh(noseGeo, matWhite);
+    nose.position.set(0, 0.12, -3.7);
+    root.add(nose);
+
+    const tailGeo = new THREE.CylinderGeometry(1.12, 0.26, 3.6, 18);
+    tailGeo.rotateX(Math.PI / 2);
+    tailGeo.scale(0.92, 1.1, 1.0);
+    const tail = new THREE.Mesh(tailGeo, matWhite);
+    tail.position.set(0, 0.22, 6.2);
+    root.add(tail);
+
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.38, 0.9), matGlass);
+    visor.position.set(0, 0.52, -4.45);
+    root.add(visor);
+
+    // Wide Swept Commercial Wings
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(16.8, 0.18, 2.2), matWhite);
+    wing.position.set(0, -0.35, 0.45);
+    root.add(wing);
+
+    // 4 Under-Wing Turbofan Engines
+    const engGeo = new THREE.CylinderGeometry(0.46, 0.4, 1.85, 14);
+    engGeo.rotateX(Math.PI / 2);
+    [-6.2, -3.2, 3.2, 6.2].forEach((xPos) => {
+      const eng = new THREE.Mesh(engGeo, matBlue);
+      eng.position.set(xPos, -0.82, 0.15);
+      root.add(eng);
+
+      const ab = this.createAfterburnerCone(0x38bdf8, 0.28, 1.1);
+      ab.position.set(xPos, -0.82, 1.15);
+      root.add(ab);
+      parts.afterburners.push(ab);
+    });
+
+    const aileronGeo = new THREE.BoxGeometry(3.4, 0.08, 0.4);
+    const leftAileron = new THREE.Mesh(aileronGeo, matGold);
+    leftAileron.position.set(-5.8, -0.35, 1.65);
+    const rightAileron = new THREE.Mesh(aileronGeo, matGold);
+    rightAileron.position.set(5.8, -0.35, 1.65);
+    root.add(leftAileron, rightAileron);
+    parts.leftAileron = leftAileron;
+    parts.rightAileron = rightAileron;
+
+    // Giant Airline Vertical Tail Fin
+    const vFin = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.1, 2.2), matBlue);
+    vFin.position.set(0, 1.85, 6.65);
+    vFin.rotation.x = -0.28;
+    root.add(vFin);
+
+    const rudder = new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.9, 0.48), matGold);
+    rudder.position.set(0, 1.85, 7.85);
+    root.add(rudder);
+    parts.rudders.push(rudder);
+
+    const hStab = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.14, 1.35), matWhite);
+    hStab.position.set(0, 0.35, 6.95);
+    root.add(hStab);
+    parts.elevators.push(hStab);
+
+    this.addLandingGear(root, matWhite, matDark, matBlue);
   }
 
   static addLandingGear(root, matStrut, matTire, matAccent) {
     const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.2, 14);
     wheelGeo.rotateZ(Math.PI / 2);
 
-    // Nose Gear
     const noseStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.85, 8), matStrut);
     noseStrut.position.set(0, -0.68, -2.05);
     const noseWheel = new THREE.Mesh(wheelGeo, matTire);
@@ -706,7 +1252,6 @@ class AircraftBuilder {
     noseWheel.position.set(0, -1.08, -2.05);
     root.add(noseStrut, noseWheel);
 
-    // Main Gear (Left & Right)
     [-1.35, 1.35].forEach((xPos) => {
       const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.9, 8), matStrut);
       strut.position.set(xPos, -0.66, 0.35);
@@ -723,25 +1268,23 @@ class AircraftBuilder {
   }
 
   static addNavigationLights(root, type) {
-    const span = type === 'jet' ? 6.35 : type === 'sport' ? 5.3 : 5.95;
+    const spec = AIRCRAFT_SPECS[type] || AIRCRAFT_SPECS.prop;
+    const span = spec.wingSpan || 5.95;
 
-    // Red Port Wingtip Light
     const redLight = new THREE.Mesh(
-      new THREE.SphereGeometry(0.11, 8, 8),
+      new THREE.SphereGeometry(0.12, 8, 8),
       new THREE.MeshBasicMaterial({ color: 0xff2222 })
     );
-    redLight.position.set(-span, 0.18, -0.2);
+    redLight.position.set(-span, 0.18, 0.2);
 
-    // Green Starboard Wingtip Light
     const greenLight = new THREE.Mesh(
-      new THREE.SphereGeometry(0.11, 8, 8),
+      new THREE.SphereGeometry(0.12, 8, 8),
       new THREE.MeshBasicMaterial({ color: 0x10b981 })
     );
-    greenLight.position.set(span, 0.18, -0.2);
+    greenLight.position.set(span, 0.18, 0.2);
 
-    // White Tail Strobe
     const whiteLight = new THREE.Mesh(
-      new THREE.SphereGeometry(0.12, 8, 8),
+      new THREE.SphereGeometry(0.13, 8, 8),
       new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
     whiteLight.position.set(0, 1.4, 5.2);
@@ -754,19 +1297,22 @@ class AircraftBuilder {
     const parts = aircraftMesh.userData.parts;
 
     if (parts.propeller) {
-      const spinSpeed = 14 + (physics.throttle / 100) * 48;
+      const spinSpeed = 14 + (physics.throttle / 100) * 52;
       parts.propeller.rotation.z += spinSpeed * dt;
     }
 
-    if (parts.afterburner) {
+    if (parts.afterburners && parts.afterburners.length > 0) {
       const normThr = physics.throttle / 100;
-      const pulse = 0.85 + Math.sin(performance.now() * 0.04) * 0.15;
-      parts.afterburner.scale.set(
-        0.65 + normThr * 0.55,
-        0.65 + normThr * 0.55,
-        (0.35 + normThr * 1.45) * pulse
-      );
-      parts.afterburner.visible = physics.throttle > 8;
+      const boostScale = physics.afterburner ? 1.45 : 1.0;
+      const pulse = 0.86 + Math.sin(performance.now() * 0.045) * 0.14;
+      parts.afterburners.forEach((flame) => {
+        flame.scale.set(
+          (0.6 + normThr * 0.55) * boostScale,
+          (0.6 + normThr * 0.55) * boostScale,
+          (0.32 + normThr * 1.45) * pulse * boostScale
+        );
+        flame.visible = physics.throttle > 8 || physics.afterburner;
+      });
     }
 
     if (parts.leftAileron && parts.rightAileron) {
@@ -786,7 +1332,160 @@ class AircraftBuilder {
 }
 
 /* ============================================================================
-   4. OPEN-WORLD 3D ENVIRONMENT GENERATOR
+   4. WINGTIP CONTRAILS & AEROBATIC SMOKE TRAIL SYSTEM
+   ============================================================================ */
+class ContrailManager {
+  constructor(scene) {
+    this.scene = scene;
+    this.enabled = true;
+    this.maxPuffs = 90;
+    this.puffs = [];
+    this.spawnTimer = 0;
+
+    const geo = new THREE.SphereGeometry(0.48, 6, 6);
+    for (let i = 0; i < this.maxPuffs; i++) {
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.visible = false;
+      this.scene.add(mesh);
+      this.puffs.push({ mesh, life: 0, maxLife: 1.4 });
+    }
+    this.cursor = 0;
+  }
+
+  update(dt, aircraftMesh, physics, spec) {
+    this.spawnTimer += dt;
+    if (
+      this.enabled &&
+      !physics.grounded &&
+      physics.speedKmh > 130 &&
+      this.spawnTimer >= 0.032 &&
+      aircraftMesh
+    ) {
+      this.spawnTimer = 0;
+      const span = spec.wingSpan || 5.8;
+      [-span, span].forEach((xOffset) => {
+        const tipWorld = new THREE.Vector3(xOffset, 0.05, 1.1)
+          .applyQuaternion(aircraftMesh.quaternion)
+          .add(aircraftMesh.position);
+        const item = this.puffs[this.cursor];
+        this.cursor = (this.cursor + 1) % this.maxPuffs;
+
+        item.life = 1.35;
+        item.maxLife = 1.35;
+        item.mesh.position.copy(tipWorld);
+        item.mesh.scale.set(0.65, 0.65, 0.65);
+        item.mesh.material.color.setHex(spec.smokeColor || 0xffffff);
+        item.mesh.material.opacity = 0.55;
+        item.mesh.visible = true;
+      });
+    }
+
+    for (let i = 0; i < this.maxPuffs; i++) {
+      const p = this.puffs[i];
+      if (p.life > 0) {
+        p.life -= dt;
+        if (p.life <= 0) {
+          p.mesh.visible = false;
+        } else {
+          const ratio = p.life / p.maxLife;
+          p.mesh.material.opacity = ratio * 0.52;
+          const s = 0.65 + (1 - ratio) * 2.2;
+          p.mesh.scale.set(s, s, s);
+        }
+      }
+    }
+  }
+}
+
+/* ============================================================================
+   5. AI AIR TRAFFIC & FIGHTER SQUADRON MANAGER (14 Active Flights)
+   ============================================================================ */
+class AITrafficManager {
+  constructor(scene) {
+    this.scene = scene;
+    this.flights = [];
+  }
+
+  init() {
+    const configs = [
+      { type: 'raptor', cx: 350, cz: -240, rx: 680, rz: 580, alt: 165, speed: 125, phase: 0.0, callsign: 'VIPER-1' },
+      { type: 'raptor', cx: 375, cz: -220, rx: 680, rz: 580, alt: 172, speed: 125, phase: 0.08, callsign: 'VIPER-2' },
+      { type: 'felon', cx: -850, cz: -1550, rx: 820, rz: 740, alt: 290, speed: 145, phase: 1.2, callsign: 'GHOST-1' },
+      { type: 'felon', cx: -820, cz: -1520, rx: 820, rz: 740, alt: 298, speed: 145, phase: 1.28, callsign: 'GHOST-2' },
+      { type: 'tomcat', cx: -1150, cz: 220, rx: 720, rz: 640, alt: 135, speed: 118, phase: 2.1, callsign: 'JOLLY-1' },
+      { type: 'tomcat', cx: -1120, cz: 240, rx: 720, rz: 640, alt: 144, speed: 118, phase: 2.18, callsign: 'JOLLY-2' },
+      { type: 'warthog', cx: 1650, cz: -950, rx: 650, rz: 550, alt: 115, speed: 88, phase: 3.4, callsign: 'HOG-1' },
+      { type: 'sport', cx: 120, cz: -180, rx: 520, rz: 820, alt: 145, speed: 110, phase: 4.1, callsign: 'APEX-7' },
+      { type: 'airliner', cx: 0, cz: -400, rx: 1650, rz: 1450, alt: 340, speed: 95, phase: 0.5, callsign: 'SKY-380' },
+      { type: 'airliner', cx: 200, cz: 100, rx: 1850, rz: 1550, alt: 390, speed: 98, phase: 3.7, callsign: 'SKY-787' },
+      { type: 'jet', cx: -200, cz: 300, rx: 1200, rz: 1050, alt: 245, speed: 92, phase: 1.9, callsign: 'EXEC-4' },
+      { type: 'prop', cx: -680, cz: 780, rx: 420, rz: 420, alt: 88, speed: 58, phase: 2.8, callsign: 'HAWK-9' },
+      { type: 'raptor', cx: 850, cz: -500, rx: 950, rz: 850, alt: 220, speed: 138, phase: 5.0, callsign: 'RAPTOR-5' },
+      { type: 'tomcat', cx: -300, cz: -700, rx: 1100, rz: 900, alt: 210, speed: 128, phase: 4.6, callsign: 'TOMCAT-3' }
+    ];
+
+    configs.forEach((cfg) => {
+      const mesh = AircraftBuilder.build(cfg.type);
+      mesh.scale.set(1.25, 1.25, 1.25);
+      this.scene.add(mesh);
+      this.flights.push({
+        ...cfg,
+        mesh,
+        angle: cfg.phase,
+        x: cfg.cx,
+        y: cfg.alt,
+        z: cfg.cz,
+        headingRad: 0
+      });
+    });
+  }
+
+  update(dt) {
+    const fakePhysics = {
+      throttle: 85,
+      afterburner: true,
+      inputRoll: 0.25,
+      inputPitch: 0.05,
+      inputYaw: 0
+    };
+
+    this.flights.forEach((f) => {
+      const angularSpeed = f.speed / Math.max(400, (f.rx + f.rz) * 0.5);
+      f.angle += angularSpeed * dt;
+
+      const nextX = f.cx + Math.cos(f.angle) * f.rx;
+      const nextZ = f.cz + Math.sin(f.angle) * f.rz;
+      const nextY = f.alt + Math.sin(f.angle * 2) * 14;
+
+      const dx = nextX - f.x;
+      const dz = nextZ - f.z;
+      const dy = nextY - f.y;
+
+      f.x = nextX;
+      f.z = nextZ;
+      f.y = nextY;
+
+      f.mesh.position.set(f.x, f.y, f.z);
+
+      if (Math.hypot(dx, dz) > 0.001) {
+        f.headingRad = Math.atan2(dx, dz);
+        const targetPos = new THREE.Vector3(f.x + dx * 20, f.y + dy * 20, f.z + dz * 20);
+        f.mesh.lookAt(targetPos);
+        f.mesh.rotateZ(0.28);
+      }
+
+      AircraftBuilder.updateControlSurfaces(f.mesh, fakePhysics, dt);
+    });
+  }
+}
+
+/* ============================================================================
+   6. OPEN-WORLD 3D ENVIRONMENT GENERATOR (Islands, Carrier, Airbases, Cities)
    ============================================================================ */
 class WorldGenerator {
   constructor(scene) {
@@ -796,6 +1495,10 @@ class WorldGenerator {
     this.beaconLight = null;
     this.buildingBoxes = [];
     this.oceanMesh = null;
+    this.hemiLight = null;
+    this.sunLight = null;
+    this.sunDisc = null;
+    this.skyMode = 'DAY';
   }
 
   generate() {
@@ -803,40 +1506,79 @@ class WorldGenerator {
     this.createOcean();
     this.createIslandsAndMountains();
     this.createAirportAndRunway();
+    this.createMilitaryAirbase();
+    this.createCarrierStrikeGroup();
     this.createCityAndBridges();
     this.createForests();
     this.createClouds();
   }
 
   setupLightingAndSky() {
-    this.scene.background = new THREE.Color(0x5ea9e6);
-    this.scene.fog = new THREE.FogExp2(0x7ec0f2, 0.00022);
+    this.scene.background = new THREE.Color(0x4ea3e8);
+    this.scene.fog = new THREE.FogExp2(0x74bcf5, 0.0002);
 
-    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e3a2f, 0.85);
-    hemiLight.position.set(0, 600, 0);
-    this.scene.add(hemiLight);
+    this.hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e3a2f, 0.9);
+    this.hemiLight.position.set(0, 600, 0);
+    this.scene.add(this.hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.45);
-    sunLight.position.set(650, 920, 540);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 100;
-    sunLight.shadow.camera.far = 2600;
+    this.sunLight = new THREE.DirectionalLight(0xfffbeb, 1.5);
+    this.sunLight.position.set(650, 920, 540);
+    this.sunLight.castShadow = true;
+    this.sunLight.shadow.mapSize.width = 2048;
+    this.sunLight.shadow.mapSize.height = 2048;
+    this.sunLight.shadow.camera.near = 100;
+    this.sunLight.shadow.camera.far = 2600;
     const d = 950;
-    sunLight.shadow.camera.left = -d;
-    sunLight.shadow.camera.right = d;
-    sunLight.shadow.camera.top = d;
-    sunLight.shadow.camera.bottom = -d;
-    this.scene.add(sunLight);
+    this.sunLight.shadow.camera.left = -d;
+    this.sunLight.shadow.camera.right = d;
+    this.sunLight.shadow.camera.top = d;
+    this.sunLight.shadow.camera.bottom = -d;
+    this.scene.add(this.sunLight);
 
-    // Visual Sun Disc in Sky
-    const sunDisc = new THREE.Mesh(
-      new THREE.SphereGeometry(75, 16, 16),
+    this.sunDisc = new THREE.Mesh(
+      new THREE.SphereGeometry(78, 16, 16),
       new THREE.MeshBasicMaterial({ color: 0xfef08a, fog: false })
     );
-    sunDisc.position.copy(sunLight.position).multiplyScalar(3.2);
-    this.scene.add(sunDisc);
+    this.sunDisc.position.copy(this.sunLight.position).multiplyScalar(3.2);
+    this.scene.add(this.sunDisc);
+  }
+
+  setTimeOfDay(mode) {
+    this.skyMode = mode;
+    if (mode === 'SUNSET') {
+      this.scene.background.setHex(0xc2410c);
+      this.scene.fog.color.setHex(0xfb923c);
+      this.hemiLight.color.setHex(0xfed7aa);
+      this.hemiLight.groundColor.setHex(0x1e1b4b);
+      this.hemiLight.intensity = 0.72;
+      this.sunLight.color.setHex(0xffedd5);
+      this.sunLight.intensity = 1.25;
+      this.sunLight.position.set(-950, 260, -820);
+      this.sunDisc.material.color.setHex(0xf97316);
+      this.sunDisc.position.copy(this.sunLight.position).multiplyScalar(3.0);
+    } else if (mode === 'NIGHT') {
+      this.scene.background.setHex(0x040b18);
+      this.scene.fog.color.setHex(0x071226);
+      this.hemiLight.color.setHex(0x38bdf8);
+      this.hemiLight.groundColor.setHex(0x020617);
+      this.hemiLight.intensity = 0.38;
+      this.sunLight.color.setHex(0x93c5fd);
+      this.sunLight.intensity = 0.45;
+      this.sunLight.position.set(500, 820, -500);
+      this.sunDisc.material.color.setHex(0xe2e8f0);
+      this.sunDisc.position.copy(this.sunLight.position).multiplyScalar(3.2);
+    } else {
+      this.scene.background.setHex(0x4ea3e8);
+      this.scene.fog.color.setHex(0x74bcf5);
+      this.hemiLight.color.setHex(0xdbeafe);
+      this.hemiLight.groundColor.setHex(0x1e3a2f);
+      this.hemiLight.intensity = 0.9;
+      this.sunLight.color.setHex(0xfffbeb);
+      this.sunLight.intensity = 1.5;
+      this.sunLight.position.set(650, 920, 540);
+      this.sunDisc.material.color.setHex(0xfef08a);
+      this.sunDisc.position.copy(this.sunLight.position).multiplyScalar(3.2);
+    }
   }
 
   createOcean() {
@@ -846,7 +1588,7 @@ class WorldGenerator {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#075985';
     ctx.fillRect(0, 0, 256, 256);
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
     ctx.lineWidth = 2;
     for (let y = 0; y < 256; y += 32) {
       ctx.beginPath();
@@ -865,8 +1607,8 @@ class WorldGenerator {
     const oceanMat = new THREE.MeshStandardMaterial({
       map: oceanTex,
       color: 0x0c6aa0,
-      roughness: 0.24,
-      metalness: 0.35
+      roughness: 0.22,
+      metalness: 0.38
     });
 
     this.oceanMesh = new THREE.Mesh(oceanGeo, oceanMat);
@@ -893,7 +1635,6 @@ class WorldGenerator {
     mainGrass.receiveShadow = true;
     this.scene.add(mainBeach, mainGrass);
 
-    // Scenic rolling hills on the West & East of Main Island
     const hillSpecs = [
       { x: -380, z: -320, rTop: 65, rBot: 240, h: 48, mat: matLush },
       { x: -460, z: 120, rTop: 45, rBot: 210, h: 62, mat: matGrass },
@@ -908,7 +1649,6 @@ class WorldGenerator {
       this.scene.add(mesh);
     });
 
-    // River & Inland Lake on Main Island
     const lake = new THREE.Mesh(new THREE.CircleGeometry(155, 24), matWaterLake);
     lake.rotation.x = -Math.PI / 2;
     lake.position.set(-280, 2.35, -60);
@@ -937,7 +1677,6 @@ class WorldGenerator {
       rockCone.receiveShadow = true;
       this.scene.add(rockCone);
 
-      // Snow Cap
       const capH = m.h * 0.36;
       const capR = m.r * 0.36;
       const snowCap = new THREE.Mesh(new THREE.ConeGeometry(capR + 2, capH, 16), matSnow);
@@ -954,13 +1693,13 @@ class WorldGenerator {
 
     this.createLighthouse(-540, 680);
 
-    // 4. Eastern Wind-Farm Mesa Island
-    const eastIsland = new THREE.Mesh(new THREE.CylinderGeometry(580, 650, 18, 24), matGrass);
+    // 4. Eastern Valkyrie Fighter Airbase Mesa Island
+    const eastIsland = new THREE.Mesh(new THREE.CylinderGeometry(640, 720, 18, 28), matGrass);
     eastIsland.position.set(1750, 8, -950);
     this.scene.add(eastIsland);
 
     for (let i = 0; i < 5; i++) {
-      this.createWindTurbine(1580 + i * 95, 17, -980 + (i % 2) * 110);
+      this.createWindTurbine(2020, 17, -1180 + i * 115);
     }
   }
 
@@ -997,59 +1736,55 @@ class WorldGenerator {
     this.windTurbines.push(rotor);
   }
 
-  createAirportAndRunway() {
-    // Runway 36 / 18 at x = 0, z = +480 to -920 (Length: 1400m, Width: 48m)
+  createRunwayTexture() {
     const rwyCanvas = document.createElement('canvas');
     rwyCanvas.width = 512;
     rwyCanvas.height = 2048;
     const ctx = rwyCanvas.getContext('2d');
 
-    // Asphalt base
     ctx.fillStyle = '#1e242b';
     ctx.fillRect(0, 0, 512, 2048);
 
-    // Side solid white lines
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(24, 0, 10, 2048);
     ctx.fillRect(478, 0, 10, 2048);
 
-    // Centerline dashed markings
     for (let y = 140; y < 1900; y += 72) {
       ctx.fillRect(250, y, 12, 42);
     }
 
-    // Threshold piano keys (Top & Bottom)
     for (let x = 56; x <= 430; x += 34) {
       ctx.fillRect(x, 35, 20, 75);
       ctx.fillRect(x, 1938, 20, 75);
     }
 
-    // Touchdown Zone Blocks
     ctx.fillStyle = '#e2e8f0';
     ctx.fillRect(90, 260, 48, 90);
     ctx.fillRect(374, 260, 48, 90);
     ctx.fillRect(90, 1698, 48, 90);
     ctx.fillRect(374, 1698, 48, 90);
 
-    const rwyTex = new THREE.CanvasTexture(rwyCanvas);
-    rwyTex.anisotropy = 4;
+    const tex = new THREE.CanvasTexture(rwyCanvas);
+    tex.anisotropy = 4;
+    return tex;
+  }
 
+  createAirportAndRunway() {
+    this.rwyTex = this.createRunwayTexture();
     const rwyGeo = new THREE.PlaneGeometry(48, 1400);
     rwyGeo.rotateX(-Math.PI / 2);
-    const rwyMat = new THREE.MeshStandardMaterial({ map: rwyTex, roughness: 0.75 });
+    const rwyMat = new THREE.MeshStandardMaterial({ map: this.rwyTex, roughness: 0.75 });
     const runway = new THREE.Mesh(rwyGeo, rwyMat);
     runway.position.set(0, 2.35, -220);
     runway.receiveShadow = true;
     this.scene.add(runway);
 
-    // Parallel Taxiway & Apron
     const taxiMat = new THREE.MeshStandardMaterial({ color: 0x27303a, roughness: 0.85 });
     const taxiway = new THREE.Mesh(new THREE.PlaneGeometry(24, 1150), taxiMat);
     taxiway.rotation.x = -Math.PI / 2;
     taxiway.position.set(-68, 2.32, -220);
     this.scene.add(taxiway);
 
-    // Runway Edge Lights & Approach Threshold Lights
     const edgeLightGeo = new THREE.SphereGeometry(0.65, 6, 6);
     const edgeMatWhite = new THREE.MeshBasicMaterial({ color: 0xfef08a });
     const edgeMatGreen = new THREE.MeshBasicMaterial({ color: 0x10b981 });
@@ -1071,12 +1806,10 @@ class WorldGenerator {
       this.scene.add(southLight, northLight);
     }
 
-    // Airport Control Tower & Hangars (West of Runway at x = -125)
     const matBuilding = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.45 });
     const matGlass = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.7 });
     const matRoof = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 });
 
-    // Control Tower
     const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(6, 8, 54, 12), matBuilding);
     towerShaft.position.set(-130, 29, -180);
     const towerCab = new THREE.Mesh(new THREE.CylinderGeometry(11, 8.5, 9, 12), matGlass);
@@ -1091,7 +1824,6 @@ class WorldGenerator {
     this.beaconLight.position.set(-130, 71, -180);
     this.scene.add(towerShaft, towerCab, towerRoof, this.beaconLight);
 
-    // 3 Aircraft Hangars & Terminal
     for (let i = 0; i < 3; i++) {
       const zPos = -40 - i * 85;
       const hangar = new THREE.Mesh(new THREE.BoxGeometry(42, 16, 52), matBuilding);
@@ -1105,17 +1837,79 @@ class WorldGenerator {
     }
   }
 
+  createMilitaryAirbase() {
+    // Valkyrie Fighter Airbase on East Mesa Island (x = 1750, z = -1350..-550, elevation y = 17.2m)
+    const rwyGeo = new THREE.PlaneGeometry(46, 820);
+    rwyGeo.rotateX(-Math.PI / 2);
+    const rwyMat = new THREE.MeshStandardMaterial({ map: this.rwyTex, roughness: 0.72 });
+    const milRunway = new THREE.Mesh(rwyGeo, rwyMat);
+    milRunway.position.set(1750, 17.2, -950);
+    this.scene.add(milRunway);
+
+    // Hardened Fighter Shelters & Radar Dome
+    const matShelter = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
+    const matDome = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+
+    for (let i = 0; i < 4; i++) {
+      const shelter = new THREE.Mesh(new THREE.BoxGeometry(32, 11, 36), matShelter);
+      shelter.position.set(1665, 22.5, -1120 + i * 105);
+      this.scene.add(shelter);
+    }
+
+    const radarPedestal = new THREE.Mesh(new THREE.CylinderGeometry(8, 10, 22, 12), matShelter);
+    radarPedestal.position.set(1650, 28, -680);
+    const radome = new THREE.Mesh(new THREE.SphereGeometry(14, 16, 16), matDome);
+    radome.position.set(1650, 46, -680);
+    this.scene.add(radarPedestal, radome);
+  }
+
+  createCarrierStrikeGroup() {
+    // USS Skybound CVN-88 Naval Aircraft Carrier at (x = -1150, z = 220)
+    // Flight Deck: x in [-1180, -1120], z in [60, 380], elevation y = 14.5m
+    const cx = -1150;
+    const cz = 220;
+    const matHull = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.55, metalness: 0.45 });
+    const matDeck = new THREE.MeshStandardMaterial({ map: this.rwyTex, roughness: 0.75 });
+    const matLine = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(48, 14, 290), matHull);
+    hull.position.set(cx, 7, cz);
+    this.scene.add(hull);
+
+    const flightDeck = new THREE.Mesh(new THREE.BoxGeometry(62, 1.4, 320), matDeck);
+    flightDeck.position.set(cx, 14.2, cz);
+    this.scene.add(flightDeck);
+
+    // Carrier Island Superstructure (Starboard side at x = cx + 24)
+    const island = new THREE.Mesh(new THREE.BoxGeometry(11, 24, 42), matHull);
+    island.position.set(cx + 24, 26, cz - 20);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.6, 18, 8), matHull);
+    mast.position.set(cx + 24, 46, cz - 20);
+    const deckBeacon = new THREE.Mesh(new THREE.SphereGeometry(1.4, 8, 8), matLine);
+    deckBeacon.position.set(cx + 24, 56, cz - 20);
+    this.scene.add(island, mast, deckBeacon);
+
+    // 2 Escort Naval Destroyers
+    [-1320, -980].forEach((dx, idx) => {
+      const dz = cz - 90 + idx * 140;
+      const dHull = new THREE.Mesh(new THREE.BoxGeometry(18, 9, 125), matHull);
+      dHull.position.set(dx, 4.5, dz);
+      const dBridge = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 28), matHull);
+      dBridge.position.set(dx, 14, dz - 10);
+      this.scene.add(dHull, dBridge);
+    });
+  }
+
   createCityAndBridges() {
-    // Procedural Window Façade Texture for Skyscrapers
     const winCanvas = document.createElement('canvas');
     winCanvas.width = 128;
     winCanvas.height = 256;
     const ctx = winCanvas.getContext('2d');
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, 128, 256);
     for (let y = 8; y < 248; y += 16) {
       for (let x = 8; x < 120; x += 16) {
-        ctx.fillStyle = (x + y) % 32 === 0 ? '#bae6fd' : '#334155';
+        ctx.fillStyle = (x + y) % 32 === 0 ? '#7dd3fc' : '#fde047';
         ctx.fillRect(x, y, 10, 10);
       }
     }
@@ -1125,11 +1919,10 @@ class WorldGenerator {
 
     const bldgMat = new THREE.MeshStandardMaterial({
       map: buildingTex,
-      roughness: 0.35,
-      metalness: 0.4
+      roughness: 0.3,
+      metalness: 0.45
     });
 
-    // Skybound Bay City Grid (East of the River, x: 420 to 820, z: -480 to +160)
     const layout = [
       { x: 450, z: -380, w: 38, d: 38, h: 115 },
       { x: 530, z: -380, w: 42, d: 42, h: 155 },
@@ -1164,7 +1957,6 @@ class WorldGenerator {
       });
     });
 
-    // Golden Suspension Bridge across River (x: 160 to 390, z: -210)
     const matBridgeRed = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.45 });
     const matRoad = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
 
@@ -1210,7 +2002,6 @@ class WorldGenerator {
       const x = (rand() - 0.45) * 1900;
       const z = (rand() - 0.55) * 1800;
 
-      // Keep clear of Runway & Taxiway & River & City core
       if (Math.abs(x) < 175 && z > -980 && z < 540) continue;
       if (x > 195 && x < 760 && z > -460 && z < 120) continue;
       if (Math.hypot(x + 280, z + 60) < 170) continue;
@@ -1274,15 +2065,22 @@ class WorldGenerator {
   }
 
   isOnRunway(x, z) {
-    return Math.abs(x) <= 26 && z >= -930 && z <= 490;
+    const onMainRwy = Math.abs(x) <= 26 && z >= -930 && z <= 490;
+    const onEastAirbase = Math.abs(x - 1750) <= 26 && z >= -1360 && z <= -540;
+    const onCarrierDeck = x >= -1182 && x <= -1118 && z >= 60 && z <= 380;
+    return onMainRwy || onEastAirbase || onCarrierDeck;
   }
 
   getSurfaceElevation(x, z) {
-    if (this.isOnRunway(x, z)) return 2.35;
-    // Main island radius check
+    if (x >= -1182 && x <= -1118 && z >= 60 && z <= 380) {
+      return 14.9;
+    }
+    if (Math.abs(x) <= 26 && z >= -930 && z <= 490) return 2.35;
+    if (Math.hypot(x - 1750, z + 950) < 680) return 17.2;
+
     const distMain = Math.hypot(x - 180, z + 220);
     if (distMain < 1060) return 2.2;
-    // North mountain island check
+
     const distNorth = Math.hypot(x + 920, z + 1750);
     if (distNorth < 1150) {
       const peakDist = Math.hypot(x + 980, z + 1820);
@@ -1291,10 +2089,7 @@ class WorldGenerator {
       }
       return 3.5;
     }
-    // South island check
     if (Math.hypot(x + 720, z - 820) < 520) return 2.5;
-    // East island check
-    if (Math.hypot(x - 1750, z + 950) < 600) return 17.0;
     return 0.0;
   }
 
@@ -1316,7 +2111,7 @@ class WorldGenerator {
 }
 
 /* ============================================================================
-   5. ARCADE-SIMULATION FLIGHT PHYSICS
+   7. ARCADE-SIMULATION FLIGHT PHYSICS (With Mobile Analog Stick & Afterburner)
    ============================================================================ */
 class FlightPhysics {
   constructor(world) {
@@ -1337,7 +2132,10 @@ class FlightPhysics {
     this.inputPitch = 0;
     this.inputRoll = 0;
     this.inputYaw = 0;
+    this.analogPitch = 0;
+    this.analogRoll = 0;
     this.airbrake = false;
+    this.afterburner = false;
 
     this.grounded = true;
     this.isStalling = false;
@@ -1366,38 +2164,41 @@ class FlightPhysics {
   update(dt, keys, spec, invertPitch) {
     if (this.crashed) return;
 
-    // 1. Throttle & Airbrake Inputs
-    if (keys.has('ShiftLeft') || keys.has('ShiftRight')) {
-      this.throttle = Math.min(100, this.throttle + 48 * dt);
+    // 1. Throttle, Afterburner Boost & Airbrake Inputs
+    this.afterburner = keys.has('Space');
+    if (keys.has('ShiftLeft') || keys.has('ShiftRight') || this.afterburner) {
+      this.throttle = Math.min(100, this.throttle + 52 * dt);
     }
     if (keys.has('ControlLeft') || keys.has('ControlRight')) {
-      this.throttle = Math.max(0, this.throttle - 48 * dt);
+      this.throttle = Math.max(0, this.throttle - 52 * dt);
     }
     this.airbrake = keys.has('KeyB');
 
-    // 2. Pitch, Roll, Yaw Control Inputs
-    let rawPitch = 0;
+    // 2. Pitch, Roll, Yaw Inputs (Keyboard + Mobile Analog Virtual Joystick)
+    let rawPitch = this.analogPitch;
     if (keys.has('KeyW') || keys.has('ArrowUp')) rawPitch += 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) rawPitch -= 1;
+    rawPitch = THREE.MathUtils.clamp(rawPitch, -1, 1);
     if (invertPitch) rawPitch = -rawPitch;
 
-    let rawRoll = 0;
+    let rawRoll = this.analogRoll;
     if (keys.has('KeyA') || keys.has('ArrowLeft')) rawRoll += 1;
     if (keys.has('KeyD') || keys.has('ArrowRight')) rawRoll -= 1;
+    rawRoll = THREE.MathUtils.clamp(rawRoll, -1, 1);
 
     let rawYaw = 0;
     if (keys.has('KeyQ')) rawYaw += 1;
     if (keys.has('KeyE')) rawYaw -= 1;
 
-    // Smooth control surface damping
-    this.inputPitch = THREE.MathUtils.lerp(this.inputPitch, rawPitch, Math.min(1, dt * 10));
-    this.inputRoll = THREE.MathUtils.lerp(this.inputRoll, rawRoll, Math.min(1, dt * 10));
-    this.inputYaw = THREE.MathUtils.lerp(this.inputYaw, rawYaw, Math.min(1, dt * 10));
+    this.inputPitch = THREE.MathUtils.lerp(this.inputPitch, rawPitch, Math.min(1, dt * 11));
+    this.inputRoll = THREE.MathUtils.lerp(this.inputRoll, rawRoll, Math.min(1, dt * 11));
+    this.inputYaw = THREE.MathUtils.lerp(this.inputYaw, rawYaw, Math.min(1, dt * 11));
 
     // 3. Speed & Thrust Calculation
-    const targetMaxSpeed = (this.throttle / 100) * spec.maxSpeedKmh;
+    const boostMult = this.afterburner ? 1.24 : 1.0;
+    const targetMaxSpeed = (this.throttle / 100) * spec.maxSpeedKmh * boostMult;
     if (this.speedKmh < targetMaxSpeed) {
-      this.speedKmh += spec.accelRate * (0.35 + (this.throttle / 100) * 0.85) * dt;
+      this.speedKmh += spec.accelRate * (0.38 + (this.throttle / 100) * 0.88) * boostMult * dt;
     } else {
       const naturalDrag = this.grounded ? 26 : 18;
       this.speedKmh = Math.max(0, this.speedKmh - naturalDrag * dt);
@@ -1407,54 +2208,47 @@ class FlightPhysics {
       this.speedKmh = Math.max(0, this.speedKmh - spec.brakeRate * dt);
     }
 
-    // Gravity speed transfer when climbing or diving
     if (!this.grounded) {
       const sinPitch = Math.sin(this.euler.x);
-      this.speedKmh -= sinPitch * 42 * dt;
+      this.speedKmh -= sinPitch * 40 * dt;
     }
-    this.speedKmh = THREE.MathUtils.clamp(this.speedKmh, 0, spec.maxSpeedKmh * 1.15);
+    this.speedKmh = THREE.MathUtils.clamp(this.speedKmh, 0, spec.maxSpeedKmh * 1.25);
 
     // 4. Control Authority Based on Speed
-    const speedAuthority = THREE.MathUtils.clamp(this.speedKmh / spec.takeoffKmh, 0.25, 1.35);
+    const speedAuthority = THREE.MathUtils.clamp(this.speedKmh / spec.takeoffKmh, 0.28, 1.35);
 
     if (this.grounded) {
-      // On runway/ground: flatten roll, allow nose rotation when speed >= 80% takeoff speed
       this.euler.z = THREE.MathUtils.lerp(this.euler.z, 0, Math.min(1, dt * 8));
       this.euler.y += this.inputYaw * spec.yawRate * 0.9 * dt;
 
-      if (this.speedKmh >= spec.takeoffKmh * 0.82 && this.inputPitch > 0) {
-        this.euler.x = Math.min(0.32, this.euler.x + this.inputPitch * spec.pitchRate * 0.75 * dt);
+      if (this.speedKmh >= spec.takeoffKmh * 0.8 && this.inputPitch > 0) {
+        this.euler.x = Math.min(0.34, this.euler.x + this.inputPitch * spec.pitchRate * 0.78 * dt);
       } else {
         this.euler.x = THREE.MathUtils.lerp(this.euler.x, 0, Math.min(1, dt * 6));
       }
 
-      // Liftoff check
-      if (this.speedKmh >= spec.takeoffKmh && this.euler.x > 0.06) {
+      if (this.speedKmh >= spec.takeoffKmh && this.euler.x > 0.05) {
         this.grounded = false;
       }
     } else {
-      // Airborne orientation update
       this.euler.x += this.inputPitch * spec.pitchRate * speedAuthority * dt;
       this.euler.z += this.inputRoll * spec.rollRate * speedAuthority * dt;
       this.euler.y += this.inputYaw * spec.yawRate * speedAuthority * dt;
 
-      // Coordinated banking turn: rolling left/right naturally turns heading smoothly
-      const bankTurn = Math.sin(this.euler.z) * 0.68 * THREE.MathUtils.clamp(this.speedKmh / 200, 0.3, 1.2);
+      const bankTurn = Math.sin(this.euler.z) * 0.72 * THREE.MathUtils.clamp(this.speedKmh / 200, 0.3, 1.25);
       this.euler.y += bankTurn * dt;
 
-      // Gentle auto-level assist when roll/pitch keys are released
-      if (rawRoll === 0) {
-        this.euler.z = THREE.MathUtils.lerp(this.euler.z, 0, dt * 0.65);
+      if (Math.abs(rawRoll) < 0.05) {
+        this.euler.z = THREE.MathUtils.lerp(this.euler.z, 0, dt * 0.75);
       }
 
-      // Stall behavior at low speed
       this.isStalling = this.speedKmh < spec.minStallKmh;
       if (this.isStalling) {
-        this.euler.x = THREE.MathUtils.lerp(this.euler.x, -0.38, dt * 1.6);
+        this.euler.x = THREE.MathUtils.lerp(this.euler.x, -0.35, dt * 1.5);
       }
 
-      this.euler.x = THREE.MathUtils.clamp(this.euler.x, -1.25, 1.25);
-      this.euler.z = THREE.MathUtils.clamp(this.euler.z, -1.45, 1.45);
+      this.euler.x = THREE.MathUtils.clamp(this.euler.x, -1.28, 1.28);
+      this.euler.z = THREE.MathUtils.clamp(this.euler.z, -1.48, 1.48);
     }
 
     this.quaternion.setFromEuler(this.euler);
@@ -1470,7 +2264,7 @@ class FlightPhysics {
         0,
         1.15
       );
-      const stallSink = (1 - Math.min(1, liftRatio)) * 16.5;
+      const stallSink = (1 - Math.min(1, liftRatio)) * 16.0;
       this.velocity.y -= stallSink * dt * 12;
     } else {
       this.velocity.y = 0;
@@ -1479,7 +2273,7 @@ class FlightPhysics {
     const prevY = this.position.y;
     this.position.addScaledVector(this.velocity, dt);
 
-    // 6. Surface & Runway Touchdown / Collision Detection
+    // 6. Surface & Runway / Carrier Deck Touchdown Detection
     const surfaceY = this.world.getSurfaceElevation(this.position.x, this.position.z);
     const gearHeight = 1.1;
 
@@ -1496,19 +2290,17 @@ class FlightPhysics {
       const pitchDeg = Math.abs(THREE.MathUtils.radToDeg(this.euler.x));
 
       if (!this.grounded) {
-        // Check if safe landing vs crash
         if (surfaceY <= 0.1) {
           this.crashed = true;
           this.crashReason = 'WATER IMPACT – KEEP ABOVE SEA LEVEL';
           return;
         }
-        if (descentRate < -14.5 || bankDeg > 28 || pitchDeg > 28) {
+        if (descentRate < -15.5 || bankDeg > 29 || pitchDeg > 29) {
           this.crashed = true;
           this.crashReason = 'HARD IMPACT – EXCESSIVE DESCENT RATE OR BANK ANGLE';
           return;
         }
 
-        // Successful Touchdown!
         this.grounded = true;
         this.isStalling = false;
         this.lastTouchdownStats = {
@@ -1530,7 +2322,6 @@ class FlightPhysics {
     const maxBound = 4200;
     if (Math.abs(this.position.x) > maxBound || Math.abs(this.position.z) > maxBound) {
       this.BoundaryWarning = true;
-      // Gently steer back toward center if exceeding outer limit
       if (Math.abs(this.position.x) > maxBound + 300 || Math.abs(this.position.z) > maxBound + 300) {
         const toCenter = Math.atan2(-this.position.x, -this.position.z);
         this.euler.y = toCenter;
@@ -1540,7 +2331,7 @@ class FlightPhysics {
       this.BoundaryWarning = false;
     }
 
-    // 8. Telemetry Values for HUD
+    // 8. Telemetry Values
     this.verticalSpeed = this.grounded ? 0 : (this.position.y - prevY) / Math.max(0.001, dt);
     this.altitude = Math.max(0, this.position.y - 2.2);
     const rawHeading = (-THREE.MathUtils.radToDeg(this.euler.y) % 360 + 360) % 360;
@@ -1551,14 +2342,14 @@ class FlightPhysics {
 }
 
 /* ============================================================================
-   6. THREE-MODE CAMERA SYSTEM (Chase, Cockpit, Cinematic)
+   8. THREE-MODE CAMERA SYSTEM (Chase, Cockpit, Cinematic)
    ============================================================================ */
 class CameraManager {
   constructor(camera, cockpitOverlayEl, camLabelEl) {
     this.camera = camera;
     this.cockpitOverlayEl = cockpitOverlayEl;
     this.camLabelEl = camLabelEl;
-    this.modeIndex = 0; // 0 = CHASE, 1 = COCKPIT, 2 = CINEMATIC
+    this.modeIndex = 0;
     this.modeNames = ['CHASE', 'COCKPIT', 'CINEMATIC'];
     this.cinematicAngle = 0;
     this.currentPos = new THREE.Vector3();
@@ -1590,9 +2381,15 @@ class CameraManager {
   update(dt, aircraftMesh, physics) {
     if (!aircraftMesh) return;
 
+    // Dynamic FOV warp when boosting at high speed
+    const targetFov = physics && physics.afterburner ? 68 : 60;
+    if (Math.abs(this.camera.fov - targetFov) > 0.1) {
+      this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, dt * 6);
+      this.camera.updateProjectionMatrix();
+    }
+
     if (this.modeIndex === 0) {
-      // 1. THIRD-PERSON CHASE CAMERA
-      const offset = new THREE.Vector3(0, 3.6, 13.8);
+      const offset = new THREE.Vector3(0, 3.8, 14.5);
       offset.applyQuaternion(aircraftMesh.quaternion);
       const desiredPos = aircraftMesh.position.clone().add(offset);
 
@@ -1606,8 +2403,7 @@ class CameraManager {
       this.camera.position.copy(this.currentPos);
       this.camera.lookAt(this.currentLook);
     } else if (this.modeIndex === 1) {
-      // 2. COCKPIT CAMERA
-      const cockpitOffset = new THREE.Vector3(0, 0.76, -0.85);
+      const cockpitOffset = new THREE.Vector3(0, 0.78, -0.85);
       cockpitOffset.applyQuaternion(aircraftMesh.quaternion);
       const camPos = aircraftMesh.position.clone().add(cockpitOffset);
 
@@ -1621,7 +2417,6 @@ class CameraManager {
       this.camera.lookAt(lookPos);
       return;
     } else {
-      // 3. CINEMATIC CAMERA
       this.cinematicAngle += dt * 0.35;
       const dist = 22;
       const sideX = Math.cos(this.cinematicAngle) * dist;
@@ -1641,7 +2436,7 @@ class CameraManager {
 
   snapToAircraft(aircraftMesh) {
     if (!aircraftMesh) return;
-    const offset = new THREE.Vector3(0, 3.6, 13.8).applyQuaternion(aircraftMesh.quaternion);
+    const offset = new THREE.Vector3(0, 3.8, 14.5).applyQuaternion(aircraftMesh.quaternion);
     this.currentPos.copy(aircraftMesh.position).add(offset);
     this.currentLook.copy(aircraftMesh.position);
     this.camera.position.copy(this.currentPos);
@@ -1650,7 +2445,198 @@ class CameraManager {
 }
 
 /* ============================================================================
-   7. MISSION MANAGER (Free Flight, Checkpoint Challenge, Landing Challenge)
+   9. INTERACTIVE RADAR MINIMAP & FULL-WORLD TACTICAL MAP RENDERER
+   ============================================================================ */
+class MapController {
+  constructor() {
+    this.minimapCanvas = document.getElementById('hud-minimap-canvas');
+    this.minimapCtx = this.minimapCanvas ? this.minimapCanvas.getContext('2d') : null;
+    this.worldMapCanvas = document.getElementById('world-map-canvas');
+    this.worldMapCtx = this.worldMapCanvas ? this.worldMapCanvas.getContext('2d') : null;
+    this.coordsEl = document.getElementById('hud-coords');
+  }
+
+  drawMapOnContext(ctx, w, h, physics, aiTraffic, mission, isFullMap) {
+    if (!ctx) return;
+
+    // World bounds [-2600, +2600] mapped to canvas [0, w]
+    const worldSpan = isFullMap ? 5200 : 2800;
+    const centerX = isFullMap ? 200 : physics.position.x;
+    const centerZ = isFullMap ? -450 : physics.position.z;
+
+    const toPx = (wx, wz) => {
+      const px = ((wx - centerX) / worldSpan + 0.5) * w;
+      const py = ((wz - centerZ) / worldSpan + 0.5) * h;
+      return [px, py];
+    };
+    const scaleR = (r) => (r / worldSpan) * w;
+
+    // Deep Ocean Radar Background
+    ctx.fillStyle = '#041226';
+    ctx.fillRect(0, 0, w, h);
+
+    // Tactical Radar Grid Lines
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.14)';
+    ctx.lineWidth = 1;
+    const step = w / 8;
+    for (let i = step; i < w; i += step) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, h);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(w, i);
+      ctx.stroke();
+    }
+
+    // Draw Islands
+    const islands = [
+      { x: 180, z: -220, r: 1040, color: '#1e4e3a', border: '#34d399', name: 'EMERALD ATOLL' },
+      { x: -920, z: -1750, r: 1120, color: '#334155', border: '#94a3b8', name: 'MT. NIMBUS' },
+      { x: -720, z: 820, r: 520, color: '#1e4e3a', border: '#34d399', name: 'SOUTH ATOLL' },
+      { x: 1750, z: -950, r: 660, color: '#274c3c', border: '#38bdf8', name: 'VALKYRIE BASE' }
+    ];
+
+    islands.forEach((isl) => {
+      const [ix, iy] = toPx(isl.x, isl.z);
+      const ir = scaleR(isl.r);
+      ctx.beginPath();
+      ctx.arc(ix, iy, ir, 0, Math.PI * 2);
+      ctx.fillStyle = isl.color;
+      ctx.fill();
+      ctx.strokeStyle = isl.border;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      if (isFullMap) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(isl.name, ix - 36, iy + ir - 12);
+      }
+    });
+
+    // Draw Bay City District
+    const [cx, cy] = toPx(430, -390);
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+    ctx.fillRect(cx, cy, scaleR(300), scaleR(460));
+    if (isFullMap) {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText('BAY CITY', cx + 4, cy + 14);
+    }
+
+    // Draw Runways & Carrier Deck
+    const drawStrip = (x, z1, z2, widthM, color, label) => {
+      const [x1, y1] = toPx(x - widthM, z1);
+      const [x2, y2] = toPx(x + widthM, z2);
+      ctx.fillStyle = color;
+      ctx.fillRect(x1, Math.min(y1, y2), Math.max(4, x2 - x1), Math.abs(y2 - y1));
+      if (isFullMap && label) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(label, x2 + 6, (y1 + y2) * 0.5);
+      }
+    };
+
+    drawStrip(0, -920, 480, 35, '#38bdf8', 'INTL RWY 36');
+    drawStrip(1750, -1350, -550, 35, '#38bdf8', 'VALKYRIE RWY');
+    drawStrip(-1150, 60, 380, 42, '#facc15', 'USS SKYBOUND CVN');
+
+    // Draw Active Checkpoints / Approach Gates
+    if (mission && mission.checkpoints) {
+      mission.checkpoints.forEach((cp, idx) => {
+        if (!cp.visible) return;
+        const [rx, ry] = toPx(cp.position.x, cp.position.z);
+        ctx.beginPath();
+        ctx.arc(rx, ry, isFullMap ? 5 : 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = idx === mission.currentCheckpointIdx ? '#f97316' : '#34d399';
+        ctx.fill();
+      });
+    }
+
+    // Draw Live AI Air Traffic & Fighter Squadrons
+    if (aiTraffic && aiTraffic.flights) {
+      aiTraffic.flights.forEach((f) => {
+        const [fx, fy] = toPx(f.x, f.z);
+        if (fx < 0 || fx > w || fy < 0 || fy > h) return;
+        ctx.save();
+        ctx.translate(fx, fy);
+        ctx.rotate(f.headingRad);
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.moveTo(0, -4);
+        ctx.lineTo(3, 4);
+        ctx.lineTo(-3, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Draw Player Aircraft & Heading Cone
+    const [px, py] = toPx(physics.position.x, physics.position.z);
+    const headingRad = -physics.euler.y;
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(headingRad);
+
+    // Radar FOV Cone
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-14, -28);
+    ctx.lineTo(14, -28);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(249, 115, 22, 0.22)';
+    ctx.fill();
+
+    // Player Jet Delta Icon
+    ctx.beginPath();
+    ctx.moveTo(0, -7);
+    ctx.lineTo(5.5, 6);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(-5.5, 6);
+    ctx.closePath();
+    ctx.fillStyle = '#f97316';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  update(physics, aiTraffic, mission, isMapModalOpen) {
+    if (this.coordsEl) {
+      this.coordsEl.textContent = `${Math.round(physics.position.x)}, ${Math.round(physics.position.z)}`;
+    }
+    if (this.minimapCtx && this.minimapCanvas) {
+      this.drawMapOnContext(
+        this.minimapCtx,
+        this.minimapCanvas.width,
+        this.minimapCanvas.height,
+        physics,
+        aiTraffic,
+        mission,
+        false
+      );
+    }
+    if (isMapModalOpen && this.worldMapCtx && this.worldMapCanvas) {
+      this.drawMapOnContext(
+        this.worldMapCtx,
+        this.worldMapCanvas.width,
+        this.worldMapCanvas.height,
+        physics,
+        aiTraffic,
+        mission,
+        true
+      );
+    }
+  }
+}
+
+/* ============================================================================
+   10. MISSION MANAGER (Free Flight, Checkpoint Challenge, Landing Challenge)
    ============================================================================ */
 class MissionManager {
   constructor(scene, world, storage, audio, onMissionEnd) {
@@ -1660,7 +2646,7 @@ class MissionManager {
     this.audio = audio;
     this.onMissionEnd = onMissionEnd;
 
-    this.mode = 'free'; // 'free' | 'checkpoint' | 'landing'
+    this.mode = 'free';
     this.score = 0;
     this.elapsedTime = 0;
     this.remainingTime = 0;
@@ -1690,7 +2676,6 @@ class MissionManager {
     this.touchdownRecorded = null;
 
     if (mode === 'free') {
-      // Start on Runway 36 South threshold ready for immediate takeoff roll
       physics.resetState({
         x: 0,
         y: 3.45,
@@ -1703,7 +2688,6 @@ class MissionManager {
         grounded: true
       });
     } else if (mode === 'checkpoint') {
-      // Start airborne over Runway 36 climbing toward Checkpoint 1
       physics.resetState({
         x: 0,
         y: 58,
@@ -1719,7 +2703,6 @@ class MissionManager {
       this.currentCheckpointIdx = 0;
       this.buildCheckpointCourse();
     } else if (mode === 'landing') {
-      // Start 1.65 km South of Runway 36 on Final Approach
       physics.resetState({
         x: 0,
         y: 185,
@@ -1740,18 +2723,18 @@ class MissionManager {
       new THREE.Vector3(0, 68, -180),
       new THREE.Vector3(25, 85, -620),
       new THREE.Vector3(210, 72, -520),
-      new THREE.Vector3(310, 48, -210), // Over suspension bridge
-      new THREE.Vector3(500, 96, -220), // Through downtown Bay City
+      new THREE.Vector3(310, 48, -210),
+      new THREE.Vector3(500, 96, -220),
       new THREE.Vector3(690, 125, -360),
       new THREE.Vector3(520, 150, -760),
       new THREE.Vector3(60, 165, -1120),
       new THREE.Vector3(-420, 145, -920),
       new THREE.Vector3(-460, 95, -340),
       new THREE.Vector3(-220, 65, 190),
-      new THREE.Vector3(0, 42, -120) // Final finish gate over runway
+      new THREE.Vector3(0, 42, -120)
     ];
 
-    const ringGeo = new THREE.TorusGeometry(22, 1.8, 12, 32);
+    const ringGeo = new THREE.TorusGeometry(24, 1.9, 12, 32);
     waypoints.forEach((pos, idx) => {
       const mat = new THREE.MeshBasicMaterial({
         color: idx === 0 ? 0xff6b1a : 0x38bdf8,
@@ -1771,7 +2754,6 @@ class MissionManager {
   }
 
   buildApproachGates() {
-    // Visual glide-slope guidance gates leading down to Runway 36 threshold (z = 475)
     const gatePositions = [
       new THREE.Vector3(0, 150, 1320),
       new THREE.Vector3(0, 112, 1040),
@@ -1796,7 +2778,6 @@ class MissionManager {
   update(dt, physics) {
     this.elapsedTime += dt;
 
-    // Track distance flown in career storage
     const distStep = (physics.speedKmh / 3.6) * dt;
     this.storage.data.distanceMeters += distStep;
 
@@ -1839,8 +2820,7 @@ class MissionManager {
       if (activeRing) {
         activeRing.rotation.z += dt * 1.5;
         const dist = physics.position.distanceTo(activeRing.position);
-        if (dist < 28) {
-          // Cleared checkpoint!
+        if (dist < 30) {
           this.audio.playCheckpoint();
           activeRing.visible = false;
           const speedBonus = Math.round(physics.speedKmh * 0.8);
@@ -1853,7 +2833,6 @@ class MissionManager {
             nextRing.material.color.setHex(0xff6b1a);
             nextRing.material.opacity = 0.95;
           } else {
-            // Finished all 12 checkpoints!
             const timeBonus = Math.round(this.remainingTime * 25);
             this.score = Math.round(this.score + timeBonus);
             this.storage.data.totalScore += this.score;
@@ -1898,17 +2877,15 @@ class MissionManager {
           label3: 'Grade',
           val3: 'INCOMPLETE',
           label4: 'Tip',
-          val4: 'USE SHIFT FOR FULL THRUST'
+          val4: 'USE SPACE FOR AFTERBURNER'
         });
       }
     } else if (this.mode === 'landing') {
-      // Record initial runway touchdown telemetry
       if (physics.lastTouchdownStats && !this.touchdownRecorded) {
         this.touchdownRecorded = { ...physics.lastTouchdownStats };
         this.audio.playLanding(this.touchdownRecorded.onRunway);
       }
 
-      // Evaluate once aircraft slows down on the ground
       if (physics.grounded && this.touchdownRecorded && !this.landingEvaluated) {
         if (!this.touchdownRecorded.onRunway) {
           this.landingEvaluated = true;
@@ -1928,7 +2905,6 @@ class MissionManager {
           return;
         }
 
-        // Wait until rolled to a safe taxi/stop speed (< 28 km/h) or stopped near end
         if (physics.speedKmh <= 25) {
           this.landingEvaluated = true;
           const td = this.touchdownRecorded;
@@ -1995,7 +2971,7 @@ class MissionManager {
 }
 
 /* ============================================================================
-   8. HUD & UI CONTROLLER
+   11. HUD & UI CONTROLLER
    ============================================================================ */
 class HUDController {
   constructor() {
@@ -2018,8 +2994,10 @@ class HUDController {
 
     this.elThrottle = document.getElementById('hud-throttle');
     this.elThrottleFill = document.getElementById('hud-throttle-fill');
+    this.elMobileThrottleSlider = document.getElementById('mobile-throttle-slider');
     this.elPillGear = document.getElementById('pill-gear');
     this.elPillBrake = document.getElementById('pill-brake');
+    this.elPillSmoke = document.getElementById('pill-smoke');
     this.elAlertBanner = document.getElementById('hud-alert-banner');
 
     this.elMfdLeft = document.getElementById('cockpit-mfd-left');
@@ -2027,7 +3005,7 @@ class HUDController {
     this.elMfdRight = document.getElementById('cockpit-mfd-right');
   }
 
-  update(physics, mission, spec) {
+  update(physics, mission, spec, smokeEnabled) {
     const modeTitle =
       mission.mode === 'checkpoint'
         ? 'CHECKPOINT CHALLENGE'
@@ -2044,7 +3022,6 @@ class HUDController {
     const stripShift = ((physics.headingDeg % 360) / 360) * 180 - 90;
     this.elCompassStrip.style.transform = `translateX(${-stripShift}px)`;
 
-    // Airspeed & Altitude
     const spd = Math.round(physics.speedKmh);
     this.elAirspeed.textContent = spd;
     const spdPct = Math.min(100, (spd / spec.maxSpeedKmh) * 100);
@@ -2058,14 +3035,15 @@ class HUDController {
     const vs = physics.verticalSpeed;
     this.elVSpeed.textContent = `${vs >= 0 ? '+' : ''}${vs.toFixed(1)}`;
 
-    // Artificial Horizon (Pitch & Roll)
     const pitchPx = THREE.MathUtils.clamp(physics.pitchDeg * 1.8, -55, 55);
     this.elHorizonDisc.style.transform = `rotate(${physics.rollDeg.toFixed(1)}deg) translateY(${pitchPx.toFixed(1)}px)`;
 
-    // Throttle & Status Pills
     const thr = Math.round(physics.throttle);
     this.elThrottle.textContent = thr;
     this.elThrottleFill.style.height = `${thr}%`;
+    if (this.elMobileThrottleSlider && document.activeElement !== this.elMobileThrottleSlider) {
+      this.elMobileThrottleSlider.value = thr;
+    }
 
     const gearDown = physics.altitude < 45 || physics.speedKmh < 185;
     this.elPillGear.textContent = gearDown ? 'GEAR DOWN' : 'GEAR UP';
@@ -2074,7 +3052,11 @@ class HUDController {
     this.elPillBrake.textContent = physics.airbrake ? 'BRAKE ON' : 'BRAKE OFF';
     this.elPillBrake.className = `status-pill ${physics.airbrake ? 'active-amber' : ''}`;
 
-    // Stall or Boundary Alert Banner
+    if (this.elPillSmoke) {
+      this.elPillSmoke.textContent = smokeEnabled ? 'SMOKE ON' : 'SMOKE OFF';
+      this.elPillSmoke.className = `status-pill ${smokeEnabled ? 'active-amber' : ''}`;
+    }
+
     if (physics.isStalling && !physics.grounded) {
       this.elAlertBanner.textContent = 'STALL WARNING – INCREASE THROTTLE & LOWER NOSE';
       this.elAlertBanner.classList.remove('hidden');
@@ -2085,7 +3067,6 @@ class HUDController {
       this.elAlertBanner.classList.add('hidden');
     }
 
-    // Target / Checkpoint Direction Indicator
     const targetInfo = mission.getTargetInfo(physics);
     if (targetInfo.active) {
       this.elTargetBanner.classList.remove('hidden');
@@ -2101,7 +3082,6 @@ class HUDController {
       this.elTargetBanner.classList.add('hidden');
     }
 
-    // Update Cockpit MFD screens
     if (this.elMfdLeft) {
       this.elMfdLeft.textContent = `IAS: ${spd} KM/H // ALT: ${alt} M`;
       this.elMfdCenter.textContent = `HDG: ${String(physics.headingDeg).padStart(3, '0')}° // V/S: ${vs.toFixed(1)} M/S`;
@@ -2111,21 +3091,24 @@ class HUDController {
 }
 
 /* ============================================================================
-   9. MAIN GAME APPLICATION CONTROLLER
+   12. MAIN GAME APPLICATION CONTROLLER
    ============================================================================ */
 class SkyboundGame {
   constructor() {
     this.storage = new StorageManager();
     this.audio = new AudioManager(this.storage);
     this.hud = new HUDController();
+    this.mapController = new MapController();
 
     this.canvas = document.getElementById('webgl-canvas');
     this.keys = new Set();
-    this.state = 'menu'; // 'menu' | 'playing' | 'paused' | 'result'
+    this.state = 'menu';
     this.resetConfirmPending = false;
 
     this.initRenderer();
     this.world = new WorldGenerator(this.scene);
+    this.contrails = new ContrailManager(this.scene);
+    this.aiTraffic = new AITrafficManager(this.scene);
     this.physics = new FlightPhysics(this.world);
     this.cameraManager = new CameraManager(
       this.camera,
@@ -2166,22 +3149,36 @@ class SkyboundGame {
     }
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 9000);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 9500);
   }
 
   boot() {
     const progressEl = document.getElementById('loader-progress');
     const statusEl = document.getElementById('loader-status');
 
-    if (progressEl) progressEl.style.width = '40%';
-    if (statusEl) statusEl.textContent = 'GENERATING ISLANDS, AIRPORT & CITYSCAPE...';
+    if (progressEl) progressEl.style.width = '35%';
+    if (statusEl) statusEl.textContent = 'GENERATING ARCHIPELAGO, CARRIER & AIRBASES...';
 
     this.world.generate();
+    this.world.setTimeOfDay(this.storage.data.skyMode || 'DAY');
 
-    if (progressEl) progressEl.style.width = '75%';
-    if (statusEl) statusEl.textContent = 'ASSEMBLING 3D AIRCRAFT FLEET...';
+    if (progressEl) progressEl.style.width = '70%';
+    if (statusEl) statusEl.textContent = 'SPAWNING 8 FIGHTER JETS & AI SQUADRONS...';
 
+    this.aiTraffic.init();
     this.spawnAircraft(this.storage.data.selectedAircraft);
+
+    // Auto-enable touch controls if mobile/tablet screen or touch sensor detected
+    if (
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth <= 900
+    ) {
+      if (this.storage.data.touchMode === 'auto') {
+        document.getElementById('touch-controls').classList.add('visible');
+      }
+    }
+
     this.bindEvents();
     this.refreshMenuUI();
 
@@ -2191,7 +3188,7 @@ class SkyboundGame {
     setTimeout(() => {
       const loader = document.getElementById('loading-screen');
       if (loader) loader.classList.add('hidden');
-    }, 350);
+    }, 320);
 
     this.clock.start();
     this.animate();
@@ -2212,7 +3209,7 @@ class SkyboundGame {
   }
 
   getActiveSpec() {
-    return AIRCRAFT_SPECS[this.storage.data.selectedAircraft] || AIRCRAFT_SPECS.prop;
+    return AIRCRAFT_SPECS[this.storage.data.selectedAircraft] || AIRCRAFT_SPECS.raptor;
   }
 
   startGameMode(mode) {
@@ -2227,15 +3224,132 @@ class SkyboundGame {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('modal-pause').classList.add('hidden');
     document.getElementById('modal-result').classList.add('hidden');
+    document.getElementById('modal-map').classList.add('hidden');
     document.getElementById('hud-layer').classList.remove('hidden');
     document.getElementById('cockpit-overlay').classList.toggle('hidden', this.cameraManager.modeIndex !== 1);
+  }
+
+  fastTravelTo(preset) {
+    this.audio.playClick();
+    const spec = this.getActiveSpec();
+    this.mission.clearMissionObjects();
+    this.mission.mode = 'free';
+    this.mission.score = 0;
+    this.mission.elapsedTime = 0;
+
+    if (preset === 'carrier') {
+      // USS Skybound CVN-88 Flight Deck Launch
+      this.physics.resetState({
+        x: -1150,
+        y: 16.0,
+        z: 345,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        speedKmh: 0,
+        throttle: 75,
+        grounded: true
+      });
+    } else if (preset === 'airbase') {
+      // Valkyrie Fighter Airbase (East Island)
+      this.physics.resetState({
+        x: 1750,
+        y: 18.3,
+        z: -600,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        speedKmh: 0,
+        throttle: 65,
+        grounded: true
+      });
+    } else if (preset === 'mountain') {
+      // Mount Nimbus High-Altitude Summit Pass
+      this.physics.resetState({
+        x: -780,
+        y: 430,
+        z: -1250,
+        pitch: 0,
+        yaw: 0.35,
+        roll: 0,
+        speedKmh: spec.cruiseSpeedKmh,
+        throttle: 82,
+        grounded: false
+      });
+    } else if (preset === 'city') {
+      // Bay City Downtown Flyover
+      this.physics.resetState({
+        x: 275,
+        y: 135,
+        z: 240,
+        pitch: 0,
+        yaw: -0.35,
+        roll: 0,
+        speedKmh: spec.cruiseSpeedKmh,
+        throttle: 80,
+        grounded: false
+      });
+    } else {
+      // Main Intl Airport RWY 36
+      this.physics.resetState({
+        x: 0,
+        y: 3.45,
+        z: 420,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        speedKmh: 0,
+        throttle: 55,
+        grounded: true
+      });
+    }
+
+    this.aircraftMesh.position.copy(this.physics.position);
+    this.aircraftMesh.quaternion.copy(this.physics.quaternion);
+    this.cameraManager.snapToAircraft(this.aircraftMesh);
+
+    this.state = 'playing';
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('modal-map').classList.add('hidden');
+    document.getElementById('modal-pause').classList.add('hidden');
+    document.getElementById('hud-layer').classList.remove('hidden');
+  }
+
+  toggleMapModal() {
+    this.audio.playClick();
+    const mapModal = document.getElementById('modal-map');
+    const isHidden = mapModal.classList.contains('hidden');
+    if (isHidden) {
+      mapModal.classList.remove('hidden');
+      this.mapController.update(this.physics, this.aiTraffic, this.mission, true);
+    } else {
+      mapModal.classList.add('hidden');
+    }
+  }
+
+  cycleTimeOfDay() {
+    const order = ['DAY', 'SUNSET', 'NIGHT'];
+    const current = this.storage.data.skyMode || 'DAY';
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    this.storage.data.skyMode = next;
+    this.storage.save();
+    this.world.setTimeOfDay(next);
+    this.refreshMenuUI();
+  }
+
+  toggleTouchControls() {
+    const touchEl = document.getElementById('touch-controls');
+    const isVis = touchEl.classList.toggle('visible');
+    this.storage.data.touchMode = isVis ? 'on' : 'auto';
+    this.storage.save();
+    this.refreshMenuUI();
   }
 
   togglePause() {
     if (this.state === 'playing') {
       this.state = 'paused';
       document.getElementById('modal-pause').classList.remove('hidden');
-      this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false);
+      this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false, false);
     } else if (this.state === 'paused') {
       this.state = 'playing';
       document.getElementById('modal-pause').classList.add('hidden');
@@ -2259,20 +3373,21 @@ class SkyboundGame {
     });
     this.aircraftMesh.position.copy(this.physics.position);
     this.aircraftMesh.quaternion.copy(this.physics.quaternion);
-    this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false);
+    this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false, false);
 
     document.getElementById('hud-layer').classList.add('hidden');
     document.getElementById('cockpit-overlay').classList.add('hidden');
     document.getElementById('hud-alert-banner').classList.add('hidden');
     document.getElementById('modal-pause').classList.add('hidden');
     document.getElementById('modal-result').classList.add('hidden');
+    document.getElementById('modal-map').classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
     this.refreshMenuUI();
   }
 
   showMissionResult(res) {
     this.state = 'result';
-    this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false);
+    this.audio.updateFlightAudio(false, 0, 0, this.getActiveSpec(), false, false);
     document.getElementById('hud-alert-banner').classList.add('hidden');
 
     document.getElementById('result-title').textContent = res.title;
@@ -2302,23 +3417,23 @@ class SkyboundGame {
     document.getElementById('stat-landings').textContent = d.landings;
     document.getElementById('stat-challenges').textContent = d.challengesCompleted;
 
-    // Aircraft selection cards
-    ['prop', 'jet', 'sport'].forEach((id) => {
+    Object.keys(AIRCRAFT_SPECS).forEach((id) => {
       const card = document.getElementById(`card-aircraft-${id}`);
       if (card) card.classList.toggle('selected', d.selectedAircraft === id);
     });
 
-    // Audio & Settings controls
     const audioLabel = d.muted ? 'OFF' : 'ON';
     document.getElementById('hud-audio-label').textContent = audioLabel;
     document.getElementById('btn-setting-mute').textContent = `MUTE: ${d.muted ? 'ON' : 'OFF'}`;
     document.getElementById('btn-setting-invert').textContent = `INVERT: ${d.invertPitch ? 'ON' : 'OFF'}`;
     document.getElementById('btn-setting-touch').textContent = `TOUCH PAD: ${d.touchMode.toUpperCase()}`;
+    document.getElementById('btn-setting-sky').textContent = `TIME: ${d.skyMode || 'DAY'}`;
+    document.getElementById('hud-sky-label').textContent = d.skyMode || 'DAY';
     document.getElementById('input-volume').value = d.volume;
 
     const touchEl = document.getElementById('touch-controls');
-    if (touchEl) {
-      touchEl.classList.toggle('visible', d.touchMode === 'on');
+    if (touchEl && d.touchMode === 'on') {
+      touchEl.classList.add('visible');
     }
   }
 
@@ -2342,6 +3457,7 @@ class SkyboundGame {
       'KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE',
       'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight',
       'KeyB', 'KeyR', 'KeyC', 'KeyP', 'KeyM', 'KeyF',
+      'KeyG', 'KeyN', 'KeyT', 'Tab',
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'
     ]);
 
@@ -2364,6 +3480,12 @@ class SkyboundGame {
         this.toggleMute();
       } else if (e.code === 'KeyF') {
         this.toggleFullscreen();
+      } else if (e.code === 'KeyG') {
+        this.contrails.enabled = !this.contrails.enabled;
+      } else if (e.code === 'KeyT') {
+        this.cycleTimeOfDay();
+      } else if (e.code === 'KeyN' || e.code === 'Tab') {
+        this.toggleMapModal();
       }
     });
 
@@ -2403,6 +3525,17 @@ class SkyboundGame {
       });
     });
 
+    // World Map & Fast Travel Modal
+    document.getElementById('btn-open-map-menu').addEventListener('click', () => this.toggleMapModal());
+    document.getElementById('btn-hud-map').addEventListener('click', () => this.toggleMapModal());
+    document.getElementById('hud-minimap-box').addEventListener('click', () => this.toggleMapModal());
+    document.getElementById('btn-close-map').addEventListener('click', () => this.toggleMapModal());
+    document.getElementById('btn-spawn-airport').addEventListener('click', () => this.fastTravelTo('airport'));
+    document.getElementById('btn-spawn-carrier').addEventListener('click', () => this.fastTravelTo('carrier'));
+    document.getElementById('btn-spawn-airbase').addEventListener('click', () => this.fastTravelTo('airbase'));
+    document.getElementById('btn-spawn-mountain').addEventListener('click', () => this.fastTravelTo('mountain'));
+    document.getElementById('btn-spawn-city').addEventListener('click', () => this.fastTravelTo('city'));
+
     // Settings Modal
     document.getElementById('btn-open-settings').addEventListener('click', () => {
       this.audio.playClick();
@@ -2424,6 +3557,10 @@ class SkyboundGame {
       this.audio.playClick();
       this.toggleMute();
     });
+    document.getElementById('btn-setting-sky').addEventListener('click', () => {
+      this.audio.playClick();
+      this.cycleTimeOfDay();
+    });
     document.getElementById('btn-setting-invert').addEventListener('click', () => {
       this.audio.playClick();
       this.storage.data.invertPitch = !this.storage.data.invertPitch;
@@ -2432,9 +3569,7 @@ class SkyboundGame {
     });
     document.getElementById('btn-setting-touch').addEventListener('click', () => {
       this.audio.playClick();
-      this.storage.data.touchMode = this.storage.data.touchMode === 'on' ? 'auto' : 'on';
-      this.storage.save();
-      this.refreshMenuUI();
+      this.toggleTouchControls();
     });
     document.getElementById('btn-reset-progress').addEventListener('click', () => {
       this.audio.playClick();
@@ -2464,6 +3599,14 @@ class SkyboundGame {
     });
 
     // HUD Quick Action Buttons
+    document.getElementById('btn-hud-sky').addEventListener('click', () => {
+      this.audio.playClick();
+      this.cycleTimeOfDay();
+    });
+    document.getElementById('btn-hud-touch').addEventListener('click', () => {
+      this.audio.playClick();
+      this.toggleTouchControls();
+    });
     document.getElementById('btn-hud-camera').addEventListener('click', () => {
       this.audio.playClick();
       this.cameraManager.cycleMode();
@@ -2509,7 +3652,80 @@ class SkyboundGame {
       this.returnToMainMenu();
     });
 
-    // On-Screen Touch Buttons
+    // Mobile Touch Action Buttons
+    document.getElementById('btn-touch-smoke').addEventListener('click', () => {
+      this.audio.playClick();
+      this.contrails.enabled = !this.contrails.enabled;
+    });
+    document.getElementById('btn-touch-map').addEventListener('click', () => {
+      this.toggleMapModal();
+    });
+
+    // Mobile Throttle Slider
+    const thrSlider = document.getElementById('mobile-throttle-slider');
+    if (thrSlider) {
+      thrSlider.addEventListener('input', (e) => {
+        this.audio.init();
+        this.physics.throttle = Number(e.target.value);
+      });
+    }
+
+    // Mobile Virtual Analog Joystick (Multi-Touch Safe)
+    const stickZone = document.getElementById('mobile-joystick-zone');
+    const stickKnob = document.getElementById('mobile-joystick-knob');
+    if (stickZone && stickKnob) {
+      let activePointerId = null;
+      const maxRadius = 44;
+
+      const updateStick = (clientX, clientY) => {
+        const rect = stickZone.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const dist = Math.hypot(dx, dy);
+        if (dist > maxRadius) {
+          dx = (dx / dist) * maxRadius;
+          dy = (dy / dist) * maxRadius;
+        }
+        stickKnob.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
+
+        // Right drag = Roll Right (-1), Left drag = Roll Left (+1)
+        this.physics.analogRoll = -(dx / maxRadius);
+        // Down drag = Pull Nose Up (+1), Up drag = Push Nose Down (-1)
+        this.physics.analogPitch = dy / maxRadius;
+      };
+
+      const resetStick = () => {
+        activePointerId = null;
+        stickKnob.style.transform = 'translate(0px, 0px)';
+        this.physics.analogRoll = 0;
+        this.physics.analogPitch = 0;
+      };
+
+      stickZone.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        this.audio.init();
+        activePointerId = e.pointerId;
+        stickZone.setPointerCapture(e.pointerId);
+        updateStick(e.clientX, e.clientY);
+      });
+
+      stickZone.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== activePointerId) return;
+        e.preventDefault();
+        updateStick(e.clientX, e.clientY);
+      });
+
+      stickZone.addEventListener('pointerup', (e) => {
+        if (e.pointerId === activePointerId) resetStick();
+      });
+      stickZone.addEventListener('pointercancel', (e) => {
+        if (e.pointerId === activePointerId) resetStick();
+      });
+    }
+
+    // Classic On-Screen D-Pad & Hold Buttons
     document.querySelectorAll('.touch-btn').forEach((btn) => {
       const code = btn.getAttribute('data-key');
       if (!code) return;
@@ -2539,6 +3755,9 @@ class SkyboundGame {
     const spec = this.getActiveSpec();
 
     this.world.update(dt);
+    this.aiTraffic.update(dt);
+
+    const isMapModalOpen = !document.getElementById('modal-map').classList.contains('hidden');
 
     if (this.state === 'playing') {
       this.physics.update(dt, this.keys, spec, this.storage.data.invertPitch);
@@ -2546,21 +3765,26 @@ class SkyboundGame {
       this.aircraftMesh.quaternion.copy(this.physics.quaternion);
 
       AircraftBuilder.updateControlSurfaces(this.aircraftMesh, this.physics, dt);
+      this.contrails.update(dt, this.aircraftMesh, this.physics, spec);
       this.cameraManager.update(dt, this.aircraftMesh, this.physics);
       this.mission.update(dt, this.physics);
-      this.hud.update(this.physics, this.mission, spec);
+      this.hud.update(this.physics, this.mission, spec, this.contrails.enabled);
+      this.mapController.update(this.physics, this.aiTraffic, this.mission, isMapModalOpen);
       this.audio.updateFlightAudio(
         true,
         this.physics.throttle,
         this.physics.speedKmh,
         spec,
-        this.physics.isStalling && !this.physics.grounded
+        this.physics.isStalling && !this.physics.grounded,
+        this.physics.afterburner
       );
     } else if (this.state === 'menu') {
-      // Idle propeller spin & cinematic hangar camera orbit on Main Menu
-      this.physics.throttle = 25;
+      this.physics.throttle = 45;
       AircraftBuilder.updateControlSurfaces(this.aircraftMesh, this.physics, dt);
       this.cameraManager.setMenuOrbit(elapsed, this.aircraftMesh);
+      if (isMapModalOpen) {
+        this.mapController.update(this.physics, this.aiTraffic, this.mission, true);
+      }
     }
 
     this.renderer.render(this.scene, this.camera);

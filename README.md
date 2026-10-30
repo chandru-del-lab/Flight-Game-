@@ -1,89 +1,41 @@
-# SKYBOUND – ULTIMATE 3D FLIGHT EXPERIENCE
+# SKYBOUND – ULTIMATE 3D FLIGHT EXPERIENCE (v2.0)
 
-**SKYBOUND** is a complete, interactive, browser-based 3D flight simulator and arcade aviation game built with **HTML5**, **CSS3**, **JavaScript ES Modules**, **Three.js (WebGL)**, **Web Audio API**, and **LocalStorage**.
-
-Explore a vibrant open-world archipelago featuring islands, mountains, forests, downtown skyscrapers, suspension bridges, lakes, dynamic drifting clouds, and a full international airport with PAPI approach lighting.
+**SKYBOUND** is a complete, interactive, desktop and mobile browser-based 3D flight simulator and fighter jet sandbox built with **HTML5**, **CSS3**, **JavaScript ES Modules**, **Three.js (WebGL)**, **Web Audio API**, and **LocalStorage**.
 
 ---
 
-## Features
+## What's New in v2.0
 
-- **Three Playable Aircraft**:
-  1. **SkyHawk X1 (Propeller Trainer)** – Balanced, agile, high-lift single-engine prop plane in signature blue, white, and orange livery with animated spinning propeller and control surfaces.
-  2. **Citation Sovereign ZX (Executive Business Jet)** – High-speed twin-engine executive jet with swept winglets, T-tail stabilizer, and smooth cruise stability.
-  3. **Viper Apex GT (Supersonic Sport Aircraft)** – High-thrust aerobatic delta-wing sport jet with twin tails, glowing afterburner nozzle, and rapid roll response.
-- **Three Playable Game Modes**:
-  1. **Free Flight** – Unlimited open-world exploration with real-time flight statistics, landmarks, and runway takeoff/landing practice.
-  2. **Checkpoint Challenge** – High-speed time-trial race through 12 floating neon checkpoint rings across islands, bridges, and mountain valleys.
-  3. **Landing Challenge** – Precision final-approach landing scenario with glide-slope guidance gates and a multi-factor landing quality scorecard (descent rate, speed, alignment, and bank angle).
-- **Arcade-Simulation Flight Physics**:
-  - Realistic lift, drag, gravity, stall behavior at low airspeeds, speed-dependent control authority, coordinated turn banking, airbrakes, and ground gear physics.
-  - Animated 3D control surfaces (ailerons, elevators, rudder, and propeller/afterburner).
-- **Aviation HUD & 3 Camera Views**:
-  - Live airspeed & altitude tapes, scrolling heading compass, artificial horizon (pitch ladder & roll indicator), vertical speed, throttle gauge, and target direction chevron.
-  - Switch seamlessly between **Third-Person Chase Camera**, **Cockpit Camera** (with instrument glareshield), and **Cinematic Camera**.
-- **Procedural Web Audio Synthesizer**:
-  - Real-time synthesized engine harmonics, airspeed wind rush, stall warning alarms, checkpoint chimes, and touchdown audio effects—zero external audio assets required.
-- **Persistent Career Progression**:
-  - Automatically saves total score, distance flown, best checkpoint race time, successful landings, completed challenges, and unlocked/selected aircraft in `localStorage`.
-
----
-
-## Project Structure
-
-```text
-SKYBOUND/
-│
-├── index.html   # Main application shell, Three.js CDN import map, HUD & menu DOM
-├── style.css    # Dark aviation-themed glassmorphism UI, HUD instruments & responsive layout
-├── game.js      # Complete 3D engine: AircraftBuilder, WorldGenerator, FlightPhysics, Audio, HUD & Missions
-└── README.md    # Setup, controls, and architecture guide
-```
+- **Full Mobile & Touch Flight Controls**:
+  - **Virtual Analog Flight Stick**: Drag smoothly in any direction on phones or tablets for proportional pitch and roll control.
+  - **Touch Throttle Slider & Quick Action Pad**: Dedicated vertical throttle slider, **BOOST** (Afterburner), **SMOKE**, **BRAKE**, **YAW L/R**, and **MAP** buttons, plus a 1-tap `TOUCH` toggle in the top HUD bar.
+- **8 Playable Aircraft & Fighter Jets**:
+  1. **SkyHawk X1** – Propeller Trainer (320 km/h)
+  2. **Citation Sovereign ZX** – Modern Business Jet (460 km/h)
+  3. **Viper Apex GT** – Fast Sporty Delta Jet (560 km/h)
+  4. **F-22X Raptor Stealth** – 5th-Gen Stealth Air Superiority Fighter (880 km/h)
+  5. **Su-57 Felon Strike** – Supersonic Digital-Camo Strike Fighter (920 km/h)
+  6. **F-14D Super Tomcat** – Naval Carrier Interceptor Jet (840 km/h)
+  7. **A-10C Thunderbolt II Warthog** – Close Air Support Attack Jet with Nose Cannon (520 km/h)
+  8. **SkyLiner A380 Titan** – Heavy Quad-Engine Widebody Airliner (620 km/h)
+- **14 Live AI Flights & Fighter Squadrons**:
+  - Dynamic AI fighter patrols and commercial airliners cruising across the archipelago and visible on radar.
+- **Interactive Radar Minimap & Tactical World Map (`N` / `TAB` or tap Minimap)**:
+  - Live bottom-left HUD radar minimap with island contours, runways, checkpoints, and AI traffic.
+  - Expandable Full-Screen Tactical Map with **Instant Fast-Travel / Spawn** to **Skybound Intl Airport**, **USS Skybound Aircraft Carrier**, **Valkyrie Fighter Airbase**, **Mount Nimbus Summit**, and **Bay City Downtown**.
+- **Enhanced 3D Graphics**:
+  - Live **Time-of-Day Switcher (`T`)**: Cycle between **Daylight**, **Golden Sunset**, and **Night Ops**.
+  - **Wingtip Contrails & Aerobatic Smoke (`G`)** and **Supersonic Afterburner Boost (`SPACE`)**.
 
 ---
 
 ## How to Run the Game
 
-Because `index.html` loads `game.js` using JavaScript ES Modules (`<script type="module">`) and resolves Three.js via a CDN `<script type="importmap">`, make sure you have an active internet connection (so your browser can fetch Three.js from the CDN) and run the folder through a local web server:
-
-### Method 1: VS Code Live Server
-1. Open the `SKYBOUND` folder in **VS Code**.
-2. Right-click `index.html` and open it using the **VS Code Live Server** extension.
-
-### Method 2: Python Local HTTP Server (Alternative)
-Run this command inside the `SKYBOUND` project folder:
+1. Open the `SKYBOUND` folder in **VS Code** and launch `index.html` with the **Live Server** extension, OR
+2. Run a local HTTP server inside the `SKYBOUND` folder:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then open your browser and navigate to:
-
-```text
-http://localhost:8000
-```
-
-> **Note:** Opening `index.html` directly via `file://` may trigger browser CORS restrictions on ES modules. Always use Live Server or `python -m http.server 8000`, and ensure an internet connection is active for the Three.js CDN import map.
-
----
-
-## Flight Controls
-
-| Key | Action |
-| :--- | :--- |
-| **W** | Pitch Up (Climb / Pull Nose Up) |
-| **S** | Pitch Down (Descend / Push Nose Down) |
-| **A** | Roll Left (Bank Left) |
-| **D** | Roll Right (Bank Right) |
-| **Q** | Yaw Left (Rudder Left) |
-| **E** | Yaw Right (Rudder Right) |
-| **SHIFT** | Increase Throttle |
-| **CTRL** | Decrease Throttle |
-| **B** | Hold Airbrake / Wheel Brakes |
-| **R** | Reset Aircraft Position |
-| **C** | Cycle Camera View (Chase / Cockpit / Cinematic) |
-| **P** | Pause / Resume Flight |
-| **M** | Mute / Unmute Audio |
-| **F** | Toggle Fullscreen |
-
-Responsive on-screen touch controls are also built in for mobile/tablet devices and can be toggled anytime from the **Settings** menu.
+Then open `http://localhost:8000` in your browser (requires an internet connection for the Three.js CDN import map).
